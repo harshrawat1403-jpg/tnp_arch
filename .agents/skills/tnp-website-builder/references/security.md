@@ -32,3 +32,9 @@ Storage policies permit an owner to upload/manage only their own permitted prefi
 Audit sensitive administrative actions: roles, verification/academic changes, drive/eligibility changes, status/selection changes, archive/delete-like actions, exports, and privileged recovery. Logs include actor, action, target type/id, timestamp, correlation ID, and a minimal sanitized before/after diff. Never put credentials, full resumes, unnecessary PII, or secret tokens in audit payloads. Restrict full audit-log access to `SUPER_ADMIN`.
 
 On suspected exposure, preserve relevant audit evidence, revoke/restrict affected access or signed links, rotate secrets through the provider, assess scope, and follow institutional notification policy. Do not silently overwrite evidence or “fix” production with unreviewed destructive actions.
+
+## Phase 3 enforcement status
+
+All Phase 2 application tables now have RLS enabled. Explicit grants are as narrow as the current routes require: authenticated users can resolve only their active profile; Super Admin can additionally read protected profiles and audit logs; all future-domain tables and workflow RPCs remain denied. The role helper is in the non-exposed `private` schema, has a pinned empty search path, and evaluates the caller through `auth.uid()`; it never accepts an arbitrary user ID or role claim.
+
+The application uses only a project URL and browser-safe publishable key. Server Actions and Route Handlers use cookie-backed clients, `src/proxy.ts` refreshes verified claims, and no service-role key exists in source, browser code, or the environment template. Public signup is disabled in the local configuration until the separately approved student/recruiter onboarding phases.

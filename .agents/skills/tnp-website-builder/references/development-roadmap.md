@@ -38,6 +38,8 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 - **Tests:** integration/RLS tests plus forged-client/direct-access negative cases.
 - **Exit:** no public admin assignment, no browser service secret, and each role boundary has evidence.
 
+**Implemented foundation:** `20260918000000_auth_rbac_foundation.sql` supplies default-deny RLS/grants, active-profile role resolution, and Super Admin audit/profile read boundaries. Server-first sign-in/sign-out, callback exchange, claim refresh, protected account behavior, an operator-only Super Admin bootstrap runbook, and pgTAP allow/deny coverage are in place. Product workflows remain deferred.
+
 ## Phase 4 — Student profiles
 
 - **Objective:** give students a secure, complete, verifiable profile.

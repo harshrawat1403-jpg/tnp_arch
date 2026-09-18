@@ -33,6 +33,14 @@ The repository uses the project-scoped Supabase CLI for local-only database deve
 
 The schema references `auth.users` only as an identity boundary for a future Phase 3 auth integration. Application tables stay in `public`, use restrictive foreign keys, and carry the data needed for later RLS without granting access now. The local CLI config disables automatic Data API exposure for new tables; Phase 3 must add reviewed RLS policies and grants before any client integration.
 
+## Phase 3 established conventions
+
+`@supabase/ssr` supplies a server-only cookie client. Password sign-in, sign-out, callback exchange, claim validation, and active-profile resolution run on the server; no browser Supabase client is needed yet. `src/proxy.ts` is the Next.js 16 session-refresh boundary and uses `getClaims()` rather than trusting a session cookie. Protected Server Components repeat the verified-claim and RLS-backed profile lookup, so Proxy remains an optimistic redirect aid rather than the sole authorization decision.
+
+`/login` is the only auth entry route and has no registration flow. `/account` proves an authenticated, active profile and shows no product data. Supabase browser-safe URL/publishable-key values live in `.env.local`; a service-role key is neither read nor accepted by application code. The one-time protected Super Admin bootstrap is documented at `supabase/BOOTSTRAP.md`.
+
+The Phase 3 migration enables RLS on every Phase 2 application table and revokes Data API table/function privileges from `anon` and `authenticated` by default. The only current grants are authenticated self-profile resolution and Super Admin read-only access to protected profiles/audit evidence. The role helper lives in a non-exposed `private` schema, pins `search_path`, and derives its answer from `auth.uid()`. Future workflow policies and RPC grants must be additive and scoped to their own approved phase.
+
 ## Trust boundaries
 
 The browser may request an operation but cannot decide roles, eligibility, drive scope, status transition, document access, or audit entitlement. Next.js validates input and obtains the authenticated identity. PostgreSQL constraints/RLS/transactional functions protect persistent state. Storage policies protect bytes and document metadata controls discoverability. Administrative SQL functions should use a trusted current user identifier, check role internally, set a safe `search_path`, minimize privileges, and be `SECURITY DEFINER` only where necessary.

@@ -1,6 +1,6 @@
 # Repository instructions
 
-This repository is reserved for a new Training & Placement (TNP) portal. Phases 1–2 establish the application foundation and versioned local schema only; they deliberately contain no cloud integration, client/server database integration, authentication, RLS, storage bucket, or product workflow implementation.
+This repository is reserved for a new Training & Placement (TNP) portal. Phases 1–3 establish the application foundation, versioned local schema, and authentication/authorization foundation only. They deliberately contain no profile, recruiter, drive, application, document, announcement, export, or other product workflow implementation.
 
 ## Required operating model
 
