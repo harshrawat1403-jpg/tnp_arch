@@ -1,0 +1,4 @@
+interface:
+  display_name: "TNP Website Builder"
+  short_description: "Build the TNP portal safely, phase by phase"
+  default_prompt: "Use $tnp-website-builder to build or review the next TNP portal change using the repository roadmap, security model, and definition of done."
