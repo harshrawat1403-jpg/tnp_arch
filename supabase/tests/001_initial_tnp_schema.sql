@@ -18,11 +18,11 @@ values
   ('00000000-0000-0000-0000-000000000006', 'candidate@example.test', '{}'),
   ('00000000-0000-0000-0000-000000000007', 'candidate.two@example.test', '{}');
 
-insert into public.profiles (id, display_name, role)
+insert into public.profiles (id, display_name, role, coordinator_slot)
 values
-  ('00000000-0000-0000-0000-000000000001', 'Technical Secretary', 'SUPER_ADMIN'),
-  ('00000000-0000-0000-0000-000000000002', 'Student One', 'STUDENT'),
-  ('00000000-0000-0000-0000-000000000003', 'TNP Secretary', 'TNP_SECRETARY'),
+  ('00000000-0000-0000-0000-000000000001', 'Technical Secretary', 'SUPER_ADMIN', null),
+  ('00000000-0000-0000-0000-000000000002', 'Student One', 'STUDENT', null),
+  ('00000000-0000-0000-0000-000000000003', 'TNP Secretary', 'TNP_SECRETARY', null),
   ('00000000-0000-0000-0000-000000000004', 'Coordinator One', 'TNP_COORDINATOR', 1),
   ('00000000-0000-0000-0000-000000000005', 'Coordinator Two', 'TNP_COORDINATOR', 2);
 
