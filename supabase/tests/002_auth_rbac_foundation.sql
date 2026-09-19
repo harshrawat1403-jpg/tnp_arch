@@ -111,10 +111,10 @@ select is(
 );
 
 select throws_ok(
-  $$update public.profiles set display_name = 'Tampered' where id = '11000000-0000-0000-0000-000000000002'$$,
+  $$update public.profiles set role = 'SUPER_ADMIN' where id = '11000000-0000-0000-0000-000000000002'$$,
   '42501',
   null,
-  'a student cannot mutate protected profile or role data'
+  'a student cannot mutate the protected role column'
 );
 
 select throws_ok(

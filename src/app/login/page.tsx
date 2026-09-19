@@ -1,4 +1,5 @@
 import { getSafeAppPath } from "@/lib/auth/redirect";
+import Link from "next/link";
 
 import { signIn } from "./actions";
 
@@ -25,8 +26,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <p className="foundation__eyebrow">Secure access</p>
       <h1 id="login-title">Sign in to the TNP portal.</h1>
       <p className="auth-panel__summary">
-        Use an account provisioned through the approved institutional process. Public registration
-        is not available.
+        Use an approved TNP account. Students with an active preloaded roster entry can register
+        with their institutional email.
       </p>
       {error === "invalid" ? (
         <p className="auth-panel__message" role="alert">
@@ -57,6 +58,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           Sign in
         </button>
       </form>
+      <p className="auth-panel__secondary">
+        New student? <Link href="/register">Create your roster-matched account</Link>.
+      </p>
     </section>
   );
 }

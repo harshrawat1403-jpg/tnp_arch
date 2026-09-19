@@ -30,3 +30,9 @@ Role assignment/removal is an atomic, audited Super Admin operation. V1 has exac
 ## Phase 3 enforcement status
 
 Phase 3 stores no role in browser state or client claims. An authenticated request resolves its active role by selecting its own RLS-protected `profiles` row after verified token claims establish the user ID. A non-exposed database helper checks `auth.uid()` for Super Admin-only policy decisions. The only currently enabled cross-account capability is Super Admin read access to protected profiles and audit logs; operational capabilities remain unavailable until their designated workflow phase. See `supabase/BOOTSTRAP.md` for the initial Super Admin procedure.
+
+## Phase 4 student-profile enforcement
+
+Only an active, unconsumed roster email may create an Auth user, and only the confirmed Auth identity may invoke student provisioning. That procedure sets `STUDENT` itself; role, roster ID, course, batch, verifier, and storage path are never browser inputs. An active student may read only their own profile, roster facts, academic record, and document metadata; direct updates are limited to display name and permitted personal columns. They cannot edit a role, verification state, academic row, another student's data, or a later-phase table.
+
+`TNP_COORDINATOR`, `TNP_SECRETARY`, and `SUPER_ADMIN` may invoke the complete-profile verification procedure. Only `TNP_SECRETARY` and `SUPER_ADMIN` may correct verified academic facts, with a non-empty reason and audit evidence. Those capabilities are database-checked using `auth.uid()` and protected role records; Phase 4 deliberately adds no student-directory or staff review UI.

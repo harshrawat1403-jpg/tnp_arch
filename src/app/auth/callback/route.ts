@@ -18,6 +18,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (error) {
       return NextResponse.redirect(new URL("/login?error=invalid", request.url));
     }
+
+    if (next === "/student") {
+      const { error: registrationError } = await supabase.rpc("complete_student_registration");
+
+      if (registrationError) {
+        return NextResponse.redirect(new URL("/register?state=invalid", request.url));
+      }
+    }
   } catch {
     return NextResponse.redirect(new URL("/login?error=unavailable", request.url));
   }

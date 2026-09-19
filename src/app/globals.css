@@ -246,6 +246,171 @@ a {
   justify-self: start;
 }
 
+.auth-panel__secondary {
+  margin: 1.5rem 0 0;
+  color: var(--ink-muted);
+}
+
+.auth-panel__secondary a,
+.profile-form__current-file a {
+  color: var(--ink);
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+.form-hint {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
+.student-page {
+  max-width: 58rem;
+}
+
+.student-page h1 {
+  max-width: 18ch;
+  margin: 0;
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.student-page__summary {
+  max-width: 44rem;
+  margin: 1.5rem 0 0;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+.student-status,
+.profile-form fieldset {
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+}
+
+.student-status {
+  max-width: 38rem;
+  margin-top: 2rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.student-status p {
+  margin: 0;
+}
+
+.student-status__label {
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.student-status__value {
+  margin-top: 0.35rem !important;
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+}
+
+.student-status ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.student-status .button {
+  margin-top: 1.5rem;
+}
+
+.student-status__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 38rem;
+  margin: 1rem 0 0;
+}
+
+.student-status__facts div {
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.student-status__facts dt {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
+
+.student-status__facts dd {
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+}
+
+.profile-layout {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.profile-form fieldset {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.profile-form legend {
+  padding-inline: 0.35rem;
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.profile-form label {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.profile-form label span {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.profile-form input,
+.profile-form textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.profile-form textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.profile-form input[type="file"] {
+  padding: 0.55rem;
+}
+
+.profile-form fieldset:disabled {
+  color: var(--ink-muted);
+}
+
+.profile-form__current-file {
+  margin: 0;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .site-footer {
   border-top: 1px solid var(--line);
   color: var(--ink-muted);
@@ -327,6 +492,10 @@ a {
 
   .site-footer__inner {
     gap: 0.4rem;
+  }
+
+  .student-status__facts {
+    grid-template-columns: 1fr;
   }
 }
 

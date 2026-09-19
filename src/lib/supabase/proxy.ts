@@ -3,10 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getOptionalSupabaseEnvironment } from "./environment";
 
-const protectedPaths = new Set(["/account"]);
-
 function isProtectedPath(pathname: string): boolean {
-  return protectedPaths.has(pathname);
+  return pathname === "/account" || pathname === "/student" || pathname.startsWith("/student/");
 }
 
 function copyAuthCookies(source: NextResponse, target: NextResponse): NextResponse {

@@ -41,6 +41,12 @@ The schema references `auth.users` only as an identity boundary for a future Pha
 
 The Phase 3 migration enables RLS on every Phase 2 application table and revokes Data API table/function privileges from `anon` and `authenticated` by default. The only current grants are authenticated self-profile resolution and Super Admin read-only access to protected profiles/audit evidence. The role helper lives in a non-exposed `private` schema, pins `search_path`, and derives its answer from `auth.uid()`. Future workflow policies and RPC grants must be additive and scoped to their own approved phase.
 
+## Phase 4 established conventions
+
+Student registration, profile read models, and mutations remain server-first: `/register`, `/student`, and `/student/profile` are Server Component routes, while the sole client island is the pending-state submit button. The database Auth hook gates Auth-user creation to an active, unconsumed normalized roster email; after email confirmation, the callback invokes the identity-derived `complete_student_registration()` procedure. No form accepts a role, roster identity, or storage authority from the browser.
+
+The student read model performs RLS-backed, per-user server queries. Personal details use narrow column updates; academic submission, verification, correction, and resume replacement use role-checking database procedures. A private resume download route first confirms the active document metadata through RLS, then creates a 60-second signed URL without persisting it. Student routes are dynamic and protected in Proxy as a session-refresh aid; their Server Components and actions still enforce identity and role independently.
+
 ## Trust boundaries
 
 The browser may request an operation but cannot decide roles, eligibility, drive scope, status transition, document access, or audit entitlement. Next.js validates input and obtains the authenticated identity. PostgreSQL constraints/RLS/transactional functions protect persistent state. Storage policies protect bytes and document metadata controls discoverability. Administrative SQL functions should use a trusted current user identifier, check role internally, set a safe `search_path`, minimize privileges, and be `SECURITY DEFINER` only where necessary.
