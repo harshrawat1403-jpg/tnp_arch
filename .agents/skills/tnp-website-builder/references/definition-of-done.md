@@ -15,6 +15,8 @@ A feature is complete only when applicable items are evidenced, not merely asser
 - Existing behavior is regression-checked; no obvious security or material performance regression remains.
 - Documentation/decision log is updated when architecture, schema, roles, operational process, or a product rule changes.
 
+For normalized skills specifically, completion also requires evidence that the legacy-array cutover is one-way and exact-normalization-only, ambiguity has a manual-review record, coordinator review is course/batch scoped, verified skills are student-immutable, and cross-owner evidence-document references fail at the database boundary. Advisory matching must be demonstrated as non-gating: it cannot alter drive eligibility or application authorization.
+
 ## Evidence standard
 
 Report exact commands/checks and their outcome, migration environment, representative manual checks, and known limitations. “Not run” is acceptable only when stated with the reason and remaining risk; it is not evidence of completion. A skipped release gate means the feature is incomplete for that environment, even if the code is ready for further development.

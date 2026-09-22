@@ -6,20 +6,27 @@
 
 ## Permission matrix
 
-| Capability                                          | Student      | Recruiter                                  | Coordinator                                                                                  | TNP Secretary          | Super Admin |
-| --------------------------------------------------- | ------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------- | ---------------------- | ----------- |
-| Read/update own permitted profile                   | Yes          | Own company/contact only                   | No                                                                                           | No                     | No          |
-| View public/published drives                        | Yes          | Assigned drives                            | Yes                                                                                          | Yes                    | Yes         |
-| Apply/withdraw own application                      | Policy-bound | No                                         | No                                                                                           | No                     | No          |
-| View applicants                                     | Own only     | Explicit assigned scope and minimum fields | Assigned/TNP scope                                                                           | All TNP scope          | All         |
-| Verify students / manage profiles                   | No           | No                                         | Yes, bounded                                                                                 | Yes                    | Yes         |
-| Manage companies, recruiters, drives, eligibility   | No           | Read-only assigned projection              | Create/edit drafts only; no publish/archive or critical settings                             | Yes                    | Yes         |
-| Update application pipeline                         | No           | No                                         | `APPLIED` -> `SHORTLISTED`/`REJECTED`, `SHORTLISTED` -> `INTERVIEW`/`REJECTED`, within scope | All normal transitions | Yes         |
-| Announcements, ordinary exports, statistics         | Read only    | Read assigned                              | Create/manage per scope                                                                      | Yes                    | Yes         |
-| Assign/remove admin roles                           | No           | No                                         | No                                                                                           | No                     | Exclusively |
-| Critical configuration, recovery, full audit access | No           | No                                         | No                                                                                           | No                     | Exclusively |
+| Capability                                              | Student      | Recruiter                                  | Coordinator                                                                                  | TNP Secretary          | Super Admin |
+| ------------------------------------------------------- | ------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------- | ---------------------- | ----------- |
+| Read/update own permitted profile                       | Yes          | Own company/contact only                   | No                                                                                           | No                     | No          |
+| View public/published drives                            | Yes          | Assigned drives                            | Yes                                                                                          | Yes                    | Yes         |
+| Apply/withdraw own application                          | Policy-bound | No                                         | No                                                                                           | No                     | No          |
+| View applicants                                         | Own only     | Explicit assigned scope and minimum fields | Assigned/TNP scope                                                                           | All TNP scope          | All         |
+| Verify students / manage profiles and skills            | No           | No                                         | Yes, only assigned course/batch scope                                                        | Yes                    | Yes         |
+| Govern canonical skill catalog / correct verified skill | No           | No                                         | No                                                                                           | Yes                    | Yes         |
+| Manage companies, recruiters, drives, eligibility       | No           | Read-only assigned projection              | Create/edit drafts only; no publish/archive or critical settings                             | Yes                    | Yes         |
+| Update application pipeline                             | No           | No                                         | `APPLIED` -> `SHORTLISTED`/`REJECTED`, `SHORTLISTED` -> `INTERVIEW`/`REJECTED`, within scope | All normal transitions | Yes         |
+| Announcements, ordinary exports, statistics             | Read only    | Read assigned                              | Create/manage per scope                                                                      | Yes                    | Yes         |
+| Assign/remove admin roles                               | No           | No                                         | No                                                                                           | No                     | Exclusively |
+| Critical configuration, recovery, full audit access     | No           | No                                         | No                                                                                           | No                     | Exclusively |
 
 The matrix is a minimum: implement exact operation-level grants, not a broad “admin” bypass. The Phase 0 decision is that coordinators may only perform the listed non-selection pipeline transitions, cannot export PII or publish/archive drives, and cannot perform terminal corrections; the TNP Secretary conducts normal selection workflow and the Super Admin handles exceptional recovery.
+
+## Approved Phase 5 skill authority
+
+`coordinator_student_scopes` assigns a coordinator to explicit roster course/batch combinations. It is mandatory for a coordinator to list, read for review, verify, or reject a student's skill declaration; a supplied student ID, hidden route, or UI filter never establishes scope. Coordinators may verify or reject only pending declarations in their assigned scope and cannot alter a verified skill, catalog entry, evidence ownership, role, academic correction, export, or audit-log visibility.
+
+Students may create/read/update their own pending declarations and evidence; correcting a rejected declaration resubmits it as pending. They cannot create catalog entries, set verification state/verifier metadata, or edit a verified skill. `TNP_SECRETARY` and `SUPER_ADMIN` manage canonical catalog lifecycle and carry out audited verified-skill correction or revocation. Recruiters have no Phase 5 access to student skills or evidence.
 
 ## Enforcement model
 

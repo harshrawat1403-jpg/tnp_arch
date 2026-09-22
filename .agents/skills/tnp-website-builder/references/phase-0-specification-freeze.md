@@ -1,6 +1,6 @@
 # Phase 0 specification freeze
 
-**Status:** complete for Phase 1. This is the canonical V1 decision record. Later changes require an explicit documented product decision and an update to the affected references.
+**Status:** complete for Phase 1, with an approved Phase 5 student-skills specification addendum. This is the canonical V1 decision record. Later changes require an explicit documented product decision and an update to the affected references.
 
 ## Product boundary and visual direction
 
@@ -39,16 +39,38 @@ Coordinators cannot publish/archive drives, assign roles, alter critical setting
 
 ## Data ownership, sensitivity, and lifecycle
 
-| Data                                                       | System owner and permitted writes                                              | Access/lifecycle                                                                                                                |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Identity/role/roster                                       | System; Super Admin role actions only                                          | Privileged; never client-provided. Student roster is a protected allowlist, not a public directory.                             |
-| Personal profile, skills, portfolio, profile image, resume | Student writes own permitted values; metadata/storage policy enforce ownership | Confidential student data. Resume is private PDF, max 5 MB; profile image optional, normalized/compressed.                      |
-| Academic data                                              | Student supplies initial values; verified values are locked                    | Coordinator verifies; TNP Secretary/Super Admin corrects with mandatory reason and audit. No correction-request workflow in V1. |
-| Company/recruiter records                                  | TNP office owns canonical record                                               | Recruiter has a read-only assigned projection in V1.                                                                            |
-| Drive/eligibility/application/status                       | TNP system/office owns operational record                                      | Student may create one application and use the defined withdrawal only; status history is append-only.                          |
-| Documents/audit logs                                       | System owns metadata/audit evidence                                            | Private buckets; short-lived authorized document URLs; full audit access only for Super Admin.                                  |
+| Data                                               | System owner and permitted writes                                                                        | Access/lifecycle                                                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Identity/role/roster                               | System; Super Admin role actions only                                                                    | Privileged; never client-provided. Student roster is a protected allowlist, not a public directory.                                      |
+| Personal profile, portfolio, profile image, resume | Student writes own permitted values; metadata/storage policy enforce ownership                           | Confidential student data. Resume is private PDF, max 5 MB; profile image optional, normalized/compressed.                               |
+| Skills and skill evidence                          | Controlled catalog is owned by TNP Secretary/Super Admin; students own pending declarations and evidence | `student_skills` is authoritative. Private PDF evidence and HTTPS project URLs are confidential; verified skills are locked to students. |
+| Academic data                                      | Student supplies initial values; verified values are locked                                              | Coordinator verifies; TNP Secretary/Super Admin corrects with mandatory reason and audit. No correction-request workflow in V1.          |
+| Company/recruiter records                          | TNP office owns canonical record                                                                         | Recruiter has a read-only assigned projection in V1.                                                                                     |
+| Drive/eligibility/application/status               | TNP system/office owns operational record                                                                | Student may create one application and use the defined withdrawal only; status history is append-only.                                   |
+| Documents/audit logs                               | System owns metadata/audit evidence                                                                      | Private buckets; short-lived authorized document URLs; full audit access only for Super Admin.                                           |
 
 V1 uses archival rather than ordinary deletion. It has no automated permanent-purge mechanism or in-product retention scheduler. Exact institutionally mandated retention/deletion periods are a pre-production governance requirement and a gate for exports/production launch, not an implementation ambiguity. Replacing a document archives old metadata/object for controlled cleanup; no document is publicly readable.
+
+## Approved Phase 5 extension — normalized student skills
+
+The Phase 4 `student_profiles.skills` text array is a self-declared legacy profile field, not a canonical skills model. Phase 5 will add the authoritative normalized model: a controlled `skills` catalog, one `student_skills` record per student/skill, optional `student_skill_evidence` records, and explicit `coordinator_student_scopes` keyed to roster course and batch. It must not create a second permanent skill system or retain a dual-write path.
+
+Each student skill has a proficiency level and an independent verification lifecycle:
+
+| Level | Meaning                                                         |
+| ----- | --------------------------------------------------------------- |
+| 1     | Foundation — introductory understanding                         |
+| 2     | Working — can use the skill with guidance                       |
+| 3     | Applied — demonstrated in coursework or a project               |
+| 4     | Advanced — independently demonstrated with substantial evidence |
+
+Skill verification is `PENDING`, `VERIFIED`, or `REJECTED`. Students may create and update only their pending declarations and evidence; correcting a rejected declaration resubmits it as `PENDING` while the prior review remains in audit evidence. A verified student skill is not student-editable. `TNP_COORDINATOR` may verify or reject only pending declarations within an explicitly assigned course/batch scope. `TNP_SECRETARY` and `SUPER_ADMIN` govern the canonical catalog and may make audited correction, revocation, or archival decisions for verified skills. Every catalog, scope, verification, rejection, correction, and revocation action is audited.
+
+Evidence is either an HTTPS project URL or a private PDF represented by `SKILL_EVIDENCE` in the existing document registry/storage pattern. A database-enforced invariant must prove that an evidence document is active, has the required kind, and belongs to the same student as its `student_skill`; a client-provided document ID is never sufficient authority.
+
+The migration may automatically trim and case-normalize an exact legacy label only. It must not infer aliases, synonyms, or semantic equivalence. Ambiguous labels (for example, distinct names that may refer to the same product) require a manual catalog-review decision before any merge. The normalized records become authoritative after cutover; the legacy array is retained only as controlled migration history until an approved deprecation decision.
+
+Verified skills are future advisory matching signals only. They may inform transparent student-to-role/opportunity matching, but never become a placement eligibility gate. Existing deterministic academic eligibility remains the only approved application-gating basis unless a later Phase 0 decision explicitly changes that rule.
 
 ## Drives, eligibility, and applications
 
@@ -72,9 +94,10 @@ Students cannot withdraw after shortlisting or deadline. A withdrawn application
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public visitor                | Can reach each public route quickly without authentication or private data; approved logo and visual direction are used; keyboard/mobile navigation works.                                                 |
 | Student onboarding/profile    | A roster-matched, verified-email student becomes only `STUDENT`, completes required data, sees missing fields, uploads a private valid PDF, and cannot edit verified academic fields.                      |
+| Student skills                | A student selects controlled skills, records level 1–4 and permitted evidence, cannot self-verify or alter a verified skill, and receives a clear rejected/pending state.                                  |
 | Student discovery/application | Student sees published drives with deterministic eligibility/reason codes; one atomic application succeeds only when eligible/open; duplicate/expired/ineligible requests fail safely; history is private. |
 | Student withdrawal            | Only an `APPLIED` application before deadline can be self-withdrawn; repeat/reapply and post-shortlist withdrawal are denied clearly.                                                                      |
-| Coordinator                   | Coordinator can perform only matrix operations; direct publish/select/export/full-audit/role attempts fail, not merely hide controls.                                                                      |
+| Coordinator                   | Coordinator can perform only matrix operations; student-skill review is limited to assigned course/batch scope; direct publish/select/export/full-audit/role attempts fail, not merely hide controls.      |
 | Secretary                     | Secretary manages normal company, recruiter, drive, application, announcement, export, and selection work; role/recovery/full-audit attempts are denied.                                                   |
 | Super Admin                   | Role action prevents loss of last Super Admin and coordinator-slot overflow; it is atomic/audited. Terminal correction requires reason and preserves history.                                              |
 | Recruiter                     | An invited recruiter sees only granted company/drive/applicant projection, no resume by default, no exports, and cannot enumerate unrelated students.                                                      |

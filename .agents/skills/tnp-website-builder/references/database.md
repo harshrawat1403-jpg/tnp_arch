@@ -4,22 +4,26 @@
 
 Use UUID primary keys (normally matching `auth.users.id` for person-owned records), `created_at`, `updated_at`, and `created_by`/`updated_by` where change ownership matters. Use `timestamptz` in UTC, `numeric` for CGPA/package values where calculation/precision matters, controlled enums/checks for lifecycle fields, and `text` only for genuinely open content.
 
-| Table                        | Purpose and key rules                                                                                                                                                                         |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `profiles`                   | One row per authenticated user; name, email snapshot if needed, active flag, and exactly one protected role; unique `user_id`. A coordinator role carries unique slot 1 or 2.                 |
-| `student_roster`             | Protected allowlist for pre-provisioned student identity, institutional email, course/batch, and active status; unique normalized email and student identifier. It is not a public directory. |
-| `student_profiles`           | Student-specific personal/contact/course/batch/skills/portfolio/completeness/verification fields; unique `user_id`; verification metadata.                                                    |
-| `academic_records`           | Current academic facts plus optional approved history; unique student + academic period/program as appropriate; validated CGPA/backlog ranges.                                                |
-| `companies`                  | Company identity, normalized display name, active/archive state; unique normalized name.                                                                                                      |
-| `recruiters`                 | Contact belongs to exactly one company; user link optional until invitation accepted; unique company + normalized email.                                                                      |
-| `placement_drives`           | Company, position, type (`PLACEMENT`/`INTERNSHIP`), description, compensation/stipend, location, deadline, lifecycle, creator/archive data.                                                   |
-| `drive_eligible_batches`     | Join table, unique drive + batch/course; avoids array-only filtering.                                                                                                                         |
-| `drive_eligibility`          | One row per drive: min CGPA, allowed current-active backlog count, and `exclude_previously_selected_placement`; checks on ranges. Other text is informational, not a hidden eligibility gate. |
-| `applications`               | One student and one drive, current status, submitted/withdrawn timestamps; `UNIQUE(student_id, drive_id)`.                                                                                    |
-| `application_status_history` | Append-only status transitions: application, from/to status, actor, reason/note, timestamp; transition check/function enforces validity.                                                      |
-| `documents`                  | Owner, type, private storage bucket/object key, validated metadata, version/archive state; never public URL as authority.                                                                     |
-| `announcements`              | Published/archived TNP notices, audience and schedule fields, author.                                                                                                                         |
-| `audit_logs`                 | Append-only actor/action/target/type/timestamp/sanitized before-after metadata/correlation ID.                                                                                                |
+| Table                        | Purpose and key rules                                                                                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `profiles`                   | One row per authenticated user; name, email snapshot if needed, active flag, and exactly one protected role; unique `user_id`. A coordinator role carries unique slot 1 or 2.                                            |
+| `student_roster`             | Protected allowlist for pre-provisioned student identity, institutional email, course/batch, and active status; unique normalized email and student identifier. It is not a public directory.                            |
+| `student_profiles`           | Student-specific personal/contact/portfolio/profile-verification fields; unique `user_id`; verification metadata. The Phase 4 `skills` array is legacy migration history after Phase 5 cutover, not the canonical model. |
+| `academic_records`           | Current academic facts plus optional approved history; unique student + academic period/program as appropriate; validated CGPA/backlog ranges.                                                                           |
+| `skills`                     | Controlled canonical skill catalog: normalized unique name, display name, active/archive state, accountable staff metadata. Students never create global catalog entries.                                                |
+| `student_skills`             | One canonical student-to-skill declaration: `UNIQUE(student_id, skill_id)`, proficiency 1–4, `PENDING`/`VERIFIED`/`REJECTED`, and verifier/review metadata consistent with the state.                                    |
+| `student_skill_evidence`     | Optional project/evidence records for a student skill: HTTPS URL or a private document reference, never both; document ownership must match the linked student in the database.                                          |
+| `coordinator_student_scopes` | Explicit coordinator assignment to one roster course/batch. It is the only source for coordinator student/skill queue scope.                                                                                             |
+| `companies`                  | Company identity, normalized display name, active/archive state; unique normalized name.                                                                                                                                 |
+| `recruiters`                 | Contact belongs to exactly one company; user link optional until invitation accepted; unique company + normalized email.                                                                                                 |
+| `placement_drives`           | Company, position, type (`PLACEMENT`/`INTERNSHIP`), description, compensation/stipend, location, deadline, lifecycle, creator/archive data.                                                                              |
+| `drive_eligible_batches`     | Join table, unique drive + batch/course; avoids array-only filtering.                                                                                                                                                    |
+| `drive_eligibility`          | One row per drive: min CGPA, allowed current-active backlog count, and `exclude_previously_selected_placement`; checks on ranges. Other text is informational, not a hidden eligibility gate.                            |
+| `applications`               | One student and one drive, current status, submitted/withdrawn timestamps; `UNIQUE(student_id, drive_id)`.                                                                                                               |
+| `application_status_history` | Append-only status transitions: application, from/to status, actor, reason/note, timestamp; transition check/function enforces validity.                                                                                 |
+| `documents`                  | Owner, type, private storage bucket/object key, validated metadata, version/archive state; never public URL as authority.                                                                                                |
+| `announcements`              | Published/archived TNP notices, audience and schedule fields, author.                                                                                                                                                    |
+| `audit_logs`                 | Append-only actor/action/target/type/timestamp/sanitized before-after metadata/correlation ID.                                                                                                                           |
 
 Use a configurable `settings` table only for a short allowlist of genuinely global values, with Super Admin-only mutation and audited access; do not make it a generic configuration dumping ground. Recruiter drive grants, if required, should be a join table (`recruiter_drive_access`) with expiration and least-privilege fields.
 
@@ -27,9 +31,11 @@ Use a configurable `settings` table only for a short allowlist of genuinely glob
 
 - Foreign keys use restrictive behavior for important records. Archive/disable referenced entities instead of deleting them.
 - Check drive deadline, compensation ranges, CGPA/backlog ranges, document type/size metadata, and status/lifecycle values. Validate inputs before the database too, but constraints remain authoritative.
-- Index all foreign keys used in joins, `applications(drive_id, status)`, `applications(student_id, created_at desc)`, active/published drive deadlines, student course/batch/verification filters, recruiter company scope, and audit target/time queries. Use partial indexes only after measuring a common filtered predicate.
+- For normalized skills, constrain proficiency to integer 1–4; enforce a valid verification-state/verifier/timestamp combination; ensure a student owns each attached active `SKILL_EVIDENCE` document; and prevent direct student mutation of verified rows. A restrictive foreign key alone cannot prove cross-row document ownership, so enforce it through a reviewed database trigger or protected database operation.
+- Index all foreign keys used in joins, `applications(drive_id, status)`, `applications(student_id, created_at desc)`, active/published drive deadlines, student course/batch/verification filters, coordinator course/batch scope, `student_skills(student_id)`, `student_skills(skill_id, verification_status)`, active skill-name lookup, recruiter company scope, and audit target/time queries. Use partial indexes only after measuring a common filtered predicate.
 - Use keyset or bounded offset pagination with deterministic ordering for large admin lists. Filter/sort in SQL; select only required columns; inspect query plans for hot paths.
 - Never duplicate “eligible” as mutable application truth. Store eligibility outcome/reason snapshot at submission only if needed for audit, alongside criteria version; recompute for authorization.
+- Verified skills are permitted only as future advisory matching inputs. They must not be joined into application eligibility authorization or create an implicit placement gate.
 
 ## Critical transactions
 
@@ -40,6 +46,8 @@ Status transition verifies actor capability/scope, locks the application, valida
 ## Migration policy
 
 Every schema, RLS, trigger, function, index, or storage-policy change is a version-controlled migration. Inspect generated SQL, test it against a disposable/local database and representative data, then apply through the environment-specific pipeline. Prefer additive/backward-compatible releases: add nullable/new fields, deploy compatible code, backfill safely, enforce constraints later, and remove old paths only after verification. Destructive changes require approved scope, tested backup/restore, impact inventory, a rollback/recovery plan, and a maintenance decision. Never use reset or destructive commands against staging/production casually. Record migration/application ordering whenever old and new app versions cannot coexist.
+
+The Phase 5 skills migration must be additive and one-way. It may import a legacy array label only after exact trim/case normalization; it must neither infer aliases nor merge semantically similar labels. Ambiguous aliases require a recorded manual catalog decision. After the reviewed import/cutover, `student_skills` is authoritative and direct writes to the legacy array are revoked; do not build a permanent synchronization trigger or dual-write path.
 
 ## Phase 2 baseline implementation
 

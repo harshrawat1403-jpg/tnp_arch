@@ -49,16 +49,20 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 - **Tests:** student self-access denial/allowance, uploads, profile validation, mobile/keyboard journey.
 - **Exit:** a verified test student can safely complete and view their profile; unauthorized reads/writes fail.
 
+<<<<<<< Updated upstream
 **Implemented foundation:** `20260918010000_student_profiles_foundation.sql` supplies normalized roster-gated signup, confirmed identity-derived student provisioning, field-level personal-profile RLS, locked academic records with audited office correction, and private resume storage. The server-rendered registration, readiness-only dashboard, profile forms, and signed download surface prove the narrow student flow; database and runtime smoke coverage includes direct Auth-hook denial, provisioning, replacement, and cross-student storage denial. Staff review/listing and all placement workflows remain deferred.
 
 ## Phase 5 — Student administration
+=======
+## Phase 5 — Student skills and bounded administration
+>>>>>>> Stashed changes
 
-- **Objective:** support bounded TNP office review of students.
-- **Prerequisites:** Phase 4 and coordinator scope decision.
-- **Tasks:** indexed search/filter/pagination, verification queues, permitted corrections, status visibility, safe export groundwork.
-- **Database/security:** scoped administrative reads/writes and audit events.
-- **Tests:** realistic list size/query checks, coordinator vs secretary restrictions, verification audit test.
-- **Exit:** office workflow works on mobile/tablet patterns and does not expose an unscoped student directory.
+- **Objective:** replace self-declared legacy skill strings with an authoritative, verifiable student-skill model while enabling bounded TNP-office review.
+- **Prerequisites:** Phase 4 and the approved normalized-skills, evidence, catalog-governance, and coordinator course/batch scope decisions in the Phase 0 freeze.
+- **Tasks:** controlled skill catalog; student skill declarations at proficiency levels 1–4; HTTPS project URL/private-PDF evidence; pending/verified/rejected review; indexed, paginated scoped queues; permitted audited correction/revocation; status visibility; safe export groundwork.
+- **Database/security:** add `skills`, `student_skills`, `student_skill_evidence`, and `coordinator_student_scopes` additively. Make normalized skills authoritative through a one-way exact-normalization legacy import. Enforce evidence-document ownership in the database, retain default-deny Data API exposure, use private `SKILL_EVIDENCE` storage, and grant coordinators only assigned course/batch access.
+- **Tests:** clean migration and exact-import/collision-review coverage; level/status/uniqueness/ownership constraints; student, coordinator, Secretary, Super Admin, and recruiter RLS allow/deny cases; verification/rejection/correction audit tests; realistic queue query/pagination checks; mobile/keyboard review.
+- **Exit:** a student can manage pending/rejected skills and evidence, a scoped coordinator can review only assigned students, verified skills are student-immutable, evidence cannot cross ownership boundaries, catalog governance is audited, and no unscoped directory or placement-eligibility gate exists.
 
 ## Phase 6 — Companies and recruiters
 

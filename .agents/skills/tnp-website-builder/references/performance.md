@@ -14,7 +14,7 @@ Authenticated data is dynamic/private by default. Cache only data with an explic
 
 ## Storage and provider-cost guardrails
 
-Storage, egress, database size, auth volume, build minutes/bandwidth, and function limits are capacity risks. Before adding file-heavy or background-like behavior, consult current official Supabase/Vercel documentation and measure projected department demand; do not hard-code quotas that may drift. Restrict uploads, avoid duplicate resume versions, use external URLs for portfolios, lazy-load document actions, compress images, and archive/review old records under a documented retention policy. Use platform logs and health checks before adding third-party observability.
+Storage, egress, database size, auth volume, build minutes/bandwidth, and function limits are capacity risks. Before adding file-heavy or background-like behavior, consult current official Supabase/Vercel documentation and measure projected department demand; do not hard-code quotas that may drift. Restrict uploads, avoid duplicate resume or skill-evidence versions, prefer HTTPS project URLs where a file is unnecessary, lazy-load document actions, compress images, and archive/review old records under a documented retention policy. Use platform logs and health checks before adding third-party observability.
 
 ## Regression checks
 

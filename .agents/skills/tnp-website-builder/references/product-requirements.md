@@ -8,14 +8,14 @@ V1 explicitly excludes elections, committees, meeting/maintenance systems, gener
 
 ## Users and V1 outcomes
 
-| User                | V1 outcome                                                                                                                                              |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Public visitor      | Quickly finds TNP information, placement/internship context, recruiter information, contact details, and login.                                         |
-| Student             | Maintains a verified profile, discovers drives, understands eligibility, applies/withdraws when allowed, and follows announcements/application history. |
-| Coordinator         | Performs bounded daily TNP tasks: student verification support, drive and applicant operations, and permitted status updates.                           |
-| TNP Secretary       | Runs normal TNP operations: companies, recruiters, drives, applications, selections, announcements, exports, and statistics.                            |
-| Technical Secretary | Owns sensitive administration, role assignment/removal, critical configuration, recovery operations, and full audit access.                             |
-| Recruiter           | Has only the specific company/drive/applicant access explicitly granted by TNP office policy.                                                           |
+| User                | V1 outcome                                                                                                                                                                    |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public visitor      | Quickly finds TNP information, placement/internship context, recruiter information, contact details, and login.                                                               |
+| Student             | Maintains a verified profile and verifiable skills, discovers drives, understands eligibility, applies/withdraws when allowed, and follows announcements/application history. |
+| Coordinator         | Performs bounded daily TNP tasks: course/batch-scoped student and skill-verification support, drive and applicant operations, and permitted status updates.                   |
+| TNP Secretary       | Runs normal TNP operations: companies, recruiters, drives, applications, selections, announcements, exports, and statistics.                                                  |
+| Technical Secretary | Owns sensitive administration, role assignment/removal, critical configuration, recovery operations, and full audit access.                                                   |
+| Recruiter           | Has only the specific company/drive/applicant access explicitly granted by TNP office policy.                                                                                 |
 
 ## Fixed application workflow
 
@@ -38,4 +38,4 @@ Eligibility is a deterministic server-side/domain calculation over published cri
 
 ## Phase 0 decisions
 
-The completed V1 specification—including account provisioning, coordinator limits, verified-academic-data handling, current-active-backlog definition, optional prior-placement exclusion, withdrawal/correction rules, recruiter scope, archival lifecycle, exports, acceptance criteria, and visual direction—is recorded in [Phase 0 specification freeze](phase-0-specification-freeze.md). It supersedes the former unresolved-policy list.
+The completed V1 specification—including account provisioning, coordinator limits and course/batch scope, verified academic and skill-data handling, controlled skill catalog/evidence rules, current-active-backlog definition, optional prior-placement exclusion, withdrawal/correction rules, recruiter scope, archival lifecycle, exports, acceptance criteria, and visual direction—is recorded in [Phase 0 specification freeze](phase-0-specification-freeze.md). Verified skills are future advisory matching signals, never placement eligibility gates. It supersedes the former unresolved-policy list.
