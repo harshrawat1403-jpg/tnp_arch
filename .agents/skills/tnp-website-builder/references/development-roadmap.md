@@ -49,14 +49,9 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 - **Tests:** student self-access denial/allowance, uploads, profile validation, mobile/keyboard journey.
 - **Exit:** a verified test student can safely complete and view their profile; unauthorized reads/writes fail.
 
-<<<<<<< Updated upstream
 **Implemented foundation:** `20260918010000_student_profiles_foundation.sql` supplies normalized roster-gated signup, confirmed identity-derived student provisioning, field-level personal-profile RLS, locked academic records with audited office correction, and private resume storage. The server-rendered registration, readiness-only dashboard, profile forms, and signed download surface prove the narrow student flow; database and runtime smoke coverage includes direct Auth-hook denial, provisioning, replacement, and cross-student storage denial. Staff review/listing and all placement workflows remain deferred.
 
 ## Phase 5 — Student skills and bounded administration
-## Phase 5 — Student administration
-=======
-## Phase 5 — Student skills and bounded administration
->>>>>>> Stashed changes
 
 - **Objective:** replace self-declared legacy skill strings with an authoritative, verifiable student-skill model while enabling bounded TNP-office review.
 - **Prerequisites:** Phase 4 and the approved normalized-skills, evidence, catalog-governance, and coordinator course/batch scope decisions in the Phase 0 freeze.
