@@ -67,6 +67,10 @@ Non-obvious indexes are documented on the schema itself: course/batch drive look
 
 Only active users can select their own `profiles` row. A verified `SUPER_ADMIN` can read protected role records and append-only audit evidence; every other current role is limited to self-profile resolution. No authenticated role can directly write application tables, invoke the application transition function, or access future-domain data before that domain's approved phase. `private.has_active_role` is a pinned-search-path security-definer helper used only for policy evaluation and derives role membership from `auth.uid()`.
 
+## Phase 5 implementation
+
+`20260924000000_add_skill_evidence_document_kind.sql` commits the `SKILL_EVIDENCE` enum member before `20260924000100_student_skills_and_bounded_administration.sql` creates normalized skills, evidence, scope tables, indexes, cutover, procedures, RLS, and private storage policy. `20260924000200_skill_catalog_reactivation.sql` adds the separately audited, Secretary/Super Admin-only transition from archived back to active without altering historical `student_skills`. The import lower-trims exact labels only and preserves distinct normalized labels such as `revit` and `autodesk revit` for later manual catalog review. The legacy array is no longer writable by students, while profile completeness and profile verification query canonical `student_skills`.
+
 ## Phase 4 student-profile implementation
 
 `20260918010000_student_profiles_foundation.sql` is additive. It gates Auth creation through an active, unconsumed `student_roster` email after `lower(trim(email))` normalization and provisions only a `STUDENT` profile through an identity-derived, confirmation-aware registration procedure. Personal profile writes are limited to display name, phone, HTTPS portfolio URL, and up to 20 normalized skills; roster course/batch remain derived. Current academic values are saved through a student procedure, lock on verification, and can be corrected only by the TNP Secretary or Super Admin with an audit record.

@@ -12,8 +12,8 @@ export type StudentProfileCompletenessInput = {
   activeResumeId: string | null;
   displayName: string | null;
   hasAcademicRecord: boolean;
+  hasStudentSkill: boolean;
   phoneNumber: string | null;
-  skills: readonly string[];
 };
 
 export type StudentProfileCompleteness = {
@@ -34,7 +34,7 @@ export function getStudentProfileCompleteness(
     missingItems.push("Phone number");
   }
 
-  if (!input.skills.some((skill) => skill.trim())) {
+  if (!input.hasStudentSkill) {
     missingItems.push("At least one skill");
   }
 

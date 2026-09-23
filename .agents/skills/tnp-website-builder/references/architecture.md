@@ -51,9 +51,9 @@ The student read model performs RLS-backed, per-user server queries. Personal de
 
 The browser may request an operation but cannot decide roles, eligibility, drive scope, status transition, document access, or audit entitlement. Next.js validates input and obtains the authenticated identity. PostgreSQL constraints/RLS/transactional functions protect persistent state. Storage policies protect bytes and document metadata controls discoverability. Administrative SQL functions should use a trusted current user identifier, check role internally, set a safe `search_path`, minimize privileges, and be `SECURITY DEFINER` only where necessary.
 
-## Phase 5 planned skills boundary
+## Phase 5 established skills boundary
 
-Phase 5 will replace the Phase 4 self-declared skill array as the application authority with server-first reads and mutations over normalized `skills`, `student_skills`, `student_skill_evidence`, and `coordinator_student_scopes`. The legacy array is a controlled one-time import source, not a parallel write model. Skill catalog changes and verified-skill corrections run through role-checking, audited database operations; a coordinator queue must always join the caller's explicit roster course/batch scope.
+Phase 5 replaces the Phase 4 self-declared skill array as the application authority with server-first reads and mutations over normalized `skills`, `student_skills`, `student_skill_evidence`, and `coordinator_student_scopes`. The legacy array is a controlled one-time import source, not a parallel write model. Skill catalog changes and verified-skill corrections run through role-checking, audited database operations; a coordinator queue always joins the caller's explicit roster course/batch scope.
 
 Skill evidence keeps the existing document registry/storage split: a database invariant verifies that a referenced active `SKILL_EVIDENCE` document belongs to the same student, while storage policy protects the corresponding private object prefix. The browser supplies neither verifier metadata nor evidence ownership authority. Verified skills are read-only to students and future matching remains advisory, separate from the deterministic drive-eligibility path.
 

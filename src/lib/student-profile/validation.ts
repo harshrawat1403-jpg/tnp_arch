@@ -37,24 +37,14 @@ export function validatePersonalProfileInput(input: {
   displayName: string;
   phoneNumber: string;
   portfolioUrl: string;
-  skills: string;
 }): ValidationResult<{
   displayName: string;
   phoneNumber: string | null;
   portfolioUrl: string | null;
-  skills: string[];
 }> {
   const displayName = input.displayName.trim();
   const phoneNumber = input.phoneNumber.trim();
   const portfolioUrl = input.portfolioUrl.trim();
-  const skills = Array.from(
-    new Set(
-      input.skills
-        .split(",")
-        .map((skill) => skill.trim())
-        .filter(Boolean),
-    ),
-  );
 
   if (displayName.length < 1 || displayName.length > 160) {
     return { ok: false, message: "Enter your full name." };
@@ -76,17 +66,12 @@ export function validatePersonalProfileInput(input: {
     }
   }
 
-  if (skills.length > 20 || skills.some((skill) => skill.length > 80)) {
-    return { ok: false, message: "Use at most 20 skills of up to 80 characters each." };
-  }
-
   return {
     ok: true,
     value: {
       displayName,
       phoneNumber: phoneNumber || null,
       portfolioUrl: portfolioUrl || null,
-      skills,
     },
   };
 }

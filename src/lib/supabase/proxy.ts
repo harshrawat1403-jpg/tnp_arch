@@ -4,7 +4,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getOptionalSupabaseEnvironment } from "./environment";
 
 function isProtectedPath(pathname: string): boolean {
-  return pathname === "/account" || pathname === "/student" || pathname.startsWith("/student/");
+  return (
+    pathname === "/account" ||
+    pathname === "/student" ||
+    pathname.startsWith("/student/") ||
+    pathname === "/tnp" ||
+    pathname.startsWith("/tnp/")
+  );
 }
 
 function copyAuthCookies(source: NextResponse, target: NextResponse): NextResponse {

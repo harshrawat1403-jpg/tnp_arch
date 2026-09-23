@@ -379,7 +379,8 @@ a {
 }
 
 .profile-form input,
-.profile-form textarea {
+.profile-form textarea,
+.profile-form select {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.5rem 0.7rem;
@@ -392,6 +393,33 @@ a {
 .profile-form textarea {
   min-height: 7rem;
   resize: vertical;
+}
+
+.skills-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.skill-record {
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-top: 1px solid var(--line);
+}
+
+.skill-record h3,
+.skills-list h2 {
+  margin: 0;
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+}
+
+.skill-record__evidence {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.skill-record__evidence-list {
+  margin: 1rem 0;
+  padding-left: 1.2rem;
 }
 
 .profile-form input[type="file"] {

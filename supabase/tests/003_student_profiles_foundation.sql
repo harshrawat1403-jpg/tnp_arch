@@ -1,5 +1,5 @@
 begin;
-select plan(36);
+select plan(37);
 
 insert into auth.users (id, email, email_confirmed_at, raw_user_meta_data)
 values
@@ -165,9 +165,15 @@ select is(
 );
 select lives_ok(
   $$update public.student_profiles
-    set phone_number = '+91 98765 43210', portfolio_url = 'https://portfolio.example.test', skills = array['AutoCAD', 'Revit']
+    set phone_number = '+91 98765 43210', portfolio_url = 'https://portfolio.example.test'
     where user_id = '21000000-0000-0000-0000-000000000004'$$,
   'a student can update permitted personal fields'
+);
+select throws_ok(
+  $$update public.student_profiles set skills = array['AutoCAD'] where user_id = '21000000-0000-0000-0000-000000000004'$$,
+  '42501',
+  null,
+  'a student cannot write the legacy skills array after the normalized cutover'
 );
 select throws_ok(
   $$update public.student_profiles
@@ -287,7 +293,7 @@ select throws_ok(
 
 reset role;
 update public.student_profiles
-set phone_number = '+91 90000 00000', skills = array['SketchUp']
+set phone_number = '+91 90000 00000'
 where user_id = '21000000-0000-0000-0000-000000000005';
 insert into public.documents (
   owner_id,
@@ -307,6 +313,12 @@ values (
   'application/pdf',
   9
 );
+insert into public.skills (id, display_name)
+values ('23000000-0000-0000-0000-000000000001', 'SketchUp');
+insert into public.student_skills (student_id, skill_id, proficiency_level)
+values ('21000000-0000-0000-0000-000000000004', '23000000-0000-0000-0000-000000000001', 2);
+insert into public.coordinator_student_scopes (coordinator_id, course, batch_year, assigned_by)
+values ('21000000-0000-0000-0000-000000000002', 'BARCH', 2027, '21000000-0000-0000-0000-000000000003');
 
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);

@@ -9,8 +9,8 @@ describe("getStudentProfileCompleteness", () => {
         activeResumeId: null,
         displayName: " ",
         hasAcademicRecord: false,
+        hasStudentSkill: false,
         phoneNumber: null,
-        skills: [],
       }),
     ).toEqual({
       isComplete: false,
@@ -30,8 +30,8 @@ describe("getStudentProfileCompleteness", () => {
         activeResumeId: "resume-id",
         displayName: "Student One",
         hasAcademicRecord: true,
+        hasStudentSkill: true,
         phoneNumber: "+91 98765 43210",
-        skills: ["AutoCAD"],
       }),
     ).toEqual({ isComplete: true, missingItems: [] });
   });

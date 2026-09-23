@@ -60,6 +60,8 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 - **Tests:** clean migration and exact-import/collision-review coverage; level/status/uniqueness/ownership constraints; student, coordinator, Secretary, Super Admin, and recruiter RLS allow/deny cases; verification/rejection/correction audit tests; realistic queue query/pagination checks; mobile/keyboard review.
 - **Exit:** a student can manage pending/rejected skills and evidence, a scoped coordinator can review only assigned students, verified skills are student-immutable, evidence cannot cross ownership boundaries, catalog governance is audited, and no unscoped directory or placement-eligibility gate exists.
 
+**Implemented foundation:** `20260924000000_add_skill_evidence_document_kind.sql`, `20260924000100_student_skills_and_bounded_administration.sql`, and `20260924000200_skill_catalog_reactivation.sql` add the approved normalized skill/evidence/scope model, exact-label legacy import, default-deny RLS, private PDF evidence storage, and audited role-checking procedures. `/student/skills` provides catalog-backed student declarations/evidence, and `/tnp/skills` supplies a database-scoped staff review queue plus bounded Secretary/Super Admin catalog lifecycle, scope assignment, and verified-skill correction/revocation controls. Career tracks/roles, matching, employer workflows, applications, exports, analytics, and all other Phase 6+ work remain deferred.
+
 ## Phase 6 — Companies and recruiters
 
 - **Objective:** manage employer records and constrained recruiter access.

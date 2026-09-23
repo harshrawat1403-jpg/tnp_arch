@@ -80,16 +80,9 @@ export default async function StudentProfilePage({ searchParams }: StudentProfil
               placeholder="https://…"
               type="url"
             />
-            <label htmlFor="skills">Skills</label>
-            <textarea
-              defaultValue={profile.personalProfile.skills.join(", ")}
-              id="skills"
-              name="skills"
-              rows={4}
-              aria-describedby="skills-hint"
-            />
-            <p className="form-hint" id="skills-hint">
-              Separate up to 20 skills with commas.
+            <p className="form-hint">
+              Skills are managed from your <Link href="/student/skills">skills record</Link> so the
+              TNP office can review each one with its evidence.
             </p>
             <SubmitButton>Save personal details</SubmitButton>
           </fieldset>

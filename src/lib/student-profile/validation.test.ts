@@ -35,7 +35,6 @@ describe("student profile validation", () => {
         displayName: "Student",
         phoneNumber: "not a number",
         portfolioUrl: "",
-        skills: "AutoCAD",
       }),
     ).toEqual({ ok: false, message: "Enter a valid phone number." });
     expect(validateAcademicInput({ cgpa: "10.1", activeBacklogCount: "0" })).toEqual({

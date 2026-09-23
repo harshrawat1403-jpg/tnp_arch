@@ -30,7 +30,6 @@ export async function updatePersonalProfile(formData: FormData): Promise<void> {
     displayName: getFormValue(formData, "displayName"),
     phoneNumber: getFormValue(formData, "phoneNumber"),
     portfolioUrl: getFormValue(formData, "portfolioUrl"),
-    skills: getFormValue(formData, "skills"),
   });
 
   if (!input.ok) {
@@ -52,7 +51,6 @@ export async function updatePersonalProfile(formData: FormData): Promise<void> {
     .update({
       phone_number: input.value.phoneNumber,
       portfolio_url: input.value.portfolioUrl,
-      skills: input.value.skills,
     })
     .eq("user_id", identity.id);
 

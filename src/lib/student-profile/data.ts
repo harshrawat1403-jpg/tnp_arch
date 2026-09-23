@@ -19,7 +19,6 @@ export type StudentProfileData = {
   personalProfile: {
     phoneNumber: string | null;
     portfolioUrl: string | null;
-    skills: string[];
     verificationStatus: "PENDING" | "VERIFIED";
   };
   resume: {
@@ -36,7 +35,6 @@ type StudentProfileRow = {
   phone_number: string | null;
   portfolio_url: string | null;
   roster_id: string;
-  skills: string[];
   verification_status: "PENDING" | "VERIFIED";
 };
 
@@ -75,7 +73,7 @@ export async function getStudentProfileData(): Promise<StudentProfileData> {
   const supabase = await createServerSupabaseClient();
   const { data: personalProfileData, error: personalProfileError } = await supabase
     .from("student_profiles")
-    .select("phone_number, portfolio_url, roster_id, skills, verification_status")
+    .select("phone_number, portfolio_url, roster_id, verification_status")
     .eq("user_id", identity.id)
     .maybeSingle();
 
@@ -84,7 +82,7 @@ export async function getStudentProfileData(): Promise<StudentProfileData> {
   }
 
   const personalProfile = personalProfileData as StudentProfileRow;
-  const [academicResult, rosterResult, resumeResult] = await Promise.all([
+  const [academicResult, rosterResult, resumeResult, skillResult] = await Promise.all([
     supabase
       .from("academic_records")
       .select("active_backlog_count, cgpa, verification_status")
@@ -102,9 +100,16 @@ export async function getStudentProfileData(): Promise<StudentProfileData> {
       .eq("document_kind", "RESUME")
       .eq("is_archived", false)
       .maybeSingle(),
+    supabase.from("student_skills").select("id").eq("student_id", identity.id).limit(1),
   ]);
 
-  if (academicResult.error || rosterResult.error || resumeResult.error || !rosterResult.data) {
+  if (
+    academicResult.error ||
+    rosterResult.error ||
+    resumeResult.error ||
+    skillResult.error ||
+    !rosterResult.data
+  ) {
     throw new Error("Unable to resolve the student profile.");
   }
 
@@ -125,7 +130,6 @@ export async function getStudentProfileData(): Promise<StudentProfileData> {
     personalProfile: {
       phoneNumber: personalProfile.phone_number,
       portfolioUrl: personalProfile.portfolio_url,
-      skills: personalProfile.skills,
       verificationStatus: personalProfile.verification_status,
     },
     roster: { batchYear: roster.batch_year, course: roster.course },
@@ -135,8 +139,8 @@ export async function getStudentProfileData(): Promise<StudentProfileData> {
       activeResumeId: resume?.id ?? null,
       displayName: identity.displayName,
       hasAcademicRecord: academicRecord !== null,
+      hasStudentSkill: (skillResult.data?.length ?? 0) > 0,
       phoneNumber: personalProfile.phone_number,
-      skills: personalProfile.skills,
     }),
   };
 }
