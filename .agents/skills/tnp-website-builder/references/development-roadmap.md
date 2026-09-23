@@ -52,6 +52,7 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 <<<<<<< Updated upstream
 **Implemented foundation:** `20260918010000_student_profiles_foundation.sql` supplies normalized roster-gated signup, confirmed identity-derived student provisioning, field-level personal-profile RLS, locked academic records with audited office correction, and private resume storage. The server-rendered registration, readiness-only dashboard, profile forms, and signed download surface prove the narrow student flow; database and runtime smoke coverage includes direct Auth-hook denial, provisioning, replacement, and cross-student storage denial. Staff review/listing and all placement workflows remain deferred.
 
+## Phase 5 — Student skills and bounded administration
 ## Phase 5 — Student administration
 =======
 ## Phase 5 — Student skills and bounded administration
