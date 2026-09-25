@@ -41,7 +41,18 @@ export async function GET(
     return new NextResponse("Evidence is temporarily unavailable.", { status: 503 });
   }
 
-  const response = NextResponse.redirect(signed.signedUrl);
-  response.headers.set("Cache-Control", "private, no-store");
-  return response;
+  // The signed URL is intentionally consumed server-side so neither it nor the
+  // underlying object path is exposed in the browser response.
+  const pdf = await fetch(signed.signedUrl, { cache: "no-store" });
+  if (!pdf.ok || !pdf.body) {
+    return new NextResponse("Evidence is temporarily unavailable.", { status: 503 });
+  }
+
+  return new NextResponse(pdf.body, {
+    headers: {
+      "Cache-Control": "private, no-store",
+      "Content-Disposition": 'attachment; filename="skill-evidence.pdf"',
+      "Content-Type": "application/pdf",
+    },
+  });
 }
