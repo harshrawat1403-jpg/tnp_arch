@@ -20,7 +20,11 @@ Applicant management includes scoped list/filter/export, status timeline, shortl
 
 ## Recruiter system
 
-Recruiters authenticate by expiring invitation. They see a read-only assigned company/contact projection and only drives granted to their recruiter/company scope. Applicant fields are a minimum necessary per-drive projection; resume access is denied by default and needs a later explicit per-drive grant decision. Recruiters cannot browse all students, change administrative statuses, access audit logs, export data, or infer students outside their assigned work.
+Recruiters authenticate only through a Supabase Auth invitation tied to a pre-created active recruiter contact and active company. The TNP Secretary/Super Admin manages contact lifecycle and invitation issue/reissue/revoke; acceptance atomically binds one confirmed Auth identity to one recruiter contact. Recruiter account binding is not public registration, staff acceptance, or self-service role conversion.
+
+Recruiters see a read-only own-contact/assigned-company projection and only explicitly granted, unexpired `PUBLISHED` drive metadata: title, type, location, and deadline. Applicant/resume fields are not exposed in Phase 6 even when legacy grant flags are populated. Recruiters cannot browse companies/recruiters/students, change administrative data, access profiles/skills/evidence/documents/resumes/applications/applicants/audit logs, export data, or infer activity outside their assigned work.
+
+Staff company management is deliberately bounded: a paginated/filterable internal company list; company detail/edit; recruiter contacts under a company; invitation state/actions; archive/reactivation; and grant/revoke only for existing published drives. Coordinator authority ends at their own uninvited drafts. There is no generic CRM, drive lifecycle surface, applicant tooling, or recruiter-facing mutation in Phase 6.
 
 ## Cross-feature rules
 

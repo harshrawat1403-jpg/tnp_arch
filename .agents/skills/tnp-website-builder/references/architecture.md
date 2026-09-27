@@ -57,6 +57,14 @@ Phase 5 replaces the Phase 4 self-declared skill array as the application author
 
 Skill evidence keeps the existing document registry/storage split: a database invariant verifies that a referenced active `SKILL_EVIDENCE` document belongs to the same student, while storage policy protects the corresponding private object prefix. The browser supplies neither verifier metadata nor evidence ownership authority. Verified skills are read-only to students and future matching remains advisory, separate from the deterministic drive-eligibility path.
 
+## Approved Phase 6 employer boundary
+
+Phase 6 remains server-first. Staff routes/actions use the cookie-backed caller client and audited database procedures for company/contact/invitation/grant state changes. A separate `server-only` Supabase Admin client is permitted solely to call `auth.admin.inviteUserByEmail()` after the staff procedure has created a `PREPARED` invitation. Its secret is server environment-only, is never named `NEXT_PUBLIC_*`, is never imported into Client Components, and does not replace caller authorization or RLS.
+
+The invite supplies only the non-secret invitation row ID as Auth user metadata and redirects through an allowlisted callback. The Before User Created hook accepts either the existing student-roster path or a matching `PREPARED` recruiter invitation; the callback then invokes an identity-derived acceptance procedure after confirmed Auth exchange. The procedure is the only path that creates a recruiter profile and binds `recruiters.user_id`; replay fails after state advances from `SENT`.
+
+Employer pages are dynamic Server Components with URL-driven, deterministic database pagination (20 rows) and minimal client controls. Recruiter pages select only the caller's own contact, company, and explicitly granted unexpired published-drive metadata. No recruiter route reads student, skill, evidence, document, resume, application, applicant, audit, or export data.
+
 ## Rendering and caching
 
 Public pages should be static or revalidated server-rendered pages. Authenticated dashboards are user-specific and normally dynamic. Fetch data on the server, select only necessary columns, use explicit pagination, and place independently slow dashboard areas behind Suspense/loading boundaries. Cache shared public content deliberately and invalidate it when TNP updates it; never serve one user’s protected data from a shared cache.

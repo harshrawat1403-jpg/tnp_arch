@@ -15,7 +15,7 @@ V1 explicitly excludes elections, committees, meeting/maintenance systems, gener
 | Coordinator         | Performs bounded daily TNP tasks: course/batch-scoped student and skill-verification support, drive and applicant operations, and permitted status updates.                   |
 | TNP Secretary       | Runs normal TNP operations: companies, recruiters, drives, applications, selections, announcements, exports, and statistics.                                                  |
 | Technical Secretary | Owns sensitive administration, role assignment/removal, critical configuration, recovery operations, and full audit access.                                                   |
-| Recruiter           | Has only the specific company/drive/applicant access explicitly granted by TNP office policy.                                                                                 |
+| Recruiter           | Is invited to one employer contact and sees only their own company plus explicitly granted published-drive metadata; applicant access remains a later policy.                 |
 
 ## Fixed application workflow
 
@@ -38,4 +38,4 @@ Eligibility is a deterministic server-side/domain calculation over published cri
 
 ## Phase 0 decisions
 
-The completed V1 specification—including account provisioning, coordinator limits and course/batch scope, verified academic and skill-data handling, controlled skill catalog/evidence rules, current-active-backlog definition, optional prior-placement exclusion, withdrawal/correction rules, recruiter scope, archival lifecycle, exports, acceptance criteria, and visual direction—is recorded in [Phase 0 specification freeze](phase-0-specification-freeze.md). Verified skills are future advisory matching signals, never placement eligibility gates. It supersedes the former unresolved-policy list.
+The completed V1 specification—including account provisioning, coordinator limits and course/batch scope, verified academic and skill-data handling, controlled skill catalog/evidence rules, current-active-backlog definition, optional prior-placement exclusion, withdrawal/correction rules, approved Phase 6 recruiter invitation/account-binding and grant boundaries, archival lifecycle, exports, acceptance criteria, and visual direction—is recorded in [Phase 0 specification freeze](phase-0-specification-freeze.md). Verified skills are future advisory matching signals, never placement eligibility gates. It supersedes the former unresolved-policy list.

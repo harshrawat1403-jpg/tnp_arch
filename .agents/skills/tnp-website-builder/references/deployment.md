@@ -10,6 +10,8 @@ Never use production as development. Maintain isolated local/development, previe
 | Preview/staging   | Pull-request/release verification           | Isolated schema/data, test identities, migration rehearsal, restricted access.              |
 | Production        | Controlled real service                     | Approved migrations/secrets only; least-privilege operator access and real-data safeguards. |
 
+Phase 6 adds one server-only Supabase Admin credential for invitation issuance. Its name may be documented in `.env.example`, but its value belongs only in protected server environment settings—never browser-prefixed variables, build output, logs, screenshots, or audit data. Before staging/production, configure and test the approved Auth invite callback URL, email confirmation/invitation expiry, and the combined Before User Created hook. Exercise issue, expiry, revocation, reissue, and acceptance against isolated test identities before admitting any recruiter.
+
 ## Delivery workflow
 
 Use a simple feature branch -> implementation -> focused tests -> typecheck/lint/build -> preview/staging verification -> review/merge -> controlled production path. Protect the production branch from direct obviously broken changes and require review appropriate to the risk. Keep commits small enough to review migrations, RLS, and domain logic alongside UI changes. Do not merge a failed migration, known authorization breach, or unreviewed destructive schema operation merely to meet a deadline.

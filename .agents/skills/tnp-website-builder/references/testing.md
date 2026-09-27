@@ -36,3 +36,11 @@ The normalized-skills release must prove all of the following against a clean da
 - private evidence storage allow/deny and signed-download behavior are covered, including recruiter denial;
 - every privileged catalog, scope, verification, rejection, correction, and revocation operation has an audit assertion;
 - no skill-derived query changes deterministic drive eligibility or application authorization.
+
+## Phase 6 required coverage
+
+Against a clean local Supabase database and isolated test identities, prove duplicate normalized company names and recruiter emails fail; invitation expiry, replay, revocation, invalid metadata, and email mismatch fail; a recruiter role cannot be forged; and exactly one confirmed Auth identity binds to exactly one recruiter contact.
+
+Exercise a locally supported Supabase Admin invitation/reissue path rather than assuming repeated-invite behavior. Cover a `PREPARED` -> `SENT` -> `ACCEPTED` journey, delivery failure handling, revocation, expired invitation reissue, and the rule that a confirmed Auth user is never deleted/recreated merely to resend. Assert sanitized audit events for every company/contact/invitation/archive/grant transition.
+
+RLS/direct REST tests must prove coordinator own-draft allowance and non-owned/invited denial; Secretary/Super Admin normal lifecycle allowance; recruiter own contact/company/granted published-drive projection only; recruiter company/contact enumeration denial; archived recruiter/company denial; grant expiry/revocation denial; and denial of student, profile, skill, evidence, document, resume, application, applicant, audit, and export access. Test that applicant/resume grant flags remain ineffective. Include server-rendered mobile/keyboard smoke journeys for the staff list/detail and recruiter self-view.

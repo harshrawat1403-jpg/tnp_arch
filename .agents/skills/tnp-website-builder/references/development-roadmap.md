@@ -65,11 +65,13 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 ## Phase 6 — Companies and recruiters
 
 - **Objective:** manage employer records and constrained recruiter access.
-- **Prerequisites:** Phases 3 and 5; recruiter onboarding/grant policy resolved.
-- **Tasks:** company lifecycle, recruiter contacts/invitations, company ownership and per-drive grant model.
-- **Database/security:** recruiter RLS/projections and invitation expiry/scope controls.
-- **Tests:** recruiter cannot enumerate unrelated records; company/recruiter archive cases.
-- **Exit:** recruiter can access only explicitly authorized company/drive information.
+- **Prerequisites:** Phases 3 and 5; approved Phase 6 company/recruiter/invitation/grant specification.
+- **Tasks:** internal company lifecycle; recruiter contacts; invitation issue/reissue/revoke and Auth-backed onboarding; recruiter archive/reactivation; bounded published-drive grant/revoke; staff and recruiter self-view surfaces.
+- **Database/security:** add the audited `recruiter_invitations` lifecycle record, protected one-to-one account binding, grant revocation history, default-deny RLS, and minimal recruiter projections. The Supabase Admin invitation client is server-only; its secret is never browser-visible. Existing drive creation/publishing and applicant/resume flags remain out of scope.
+- **Tests:** local Admin invitation integration; replay/expiry/revocation/email-mismatch/forged-role rejection; staff role matrix; recruiter own-projection and direct REST/RLS denials; archive/grant expiry/revocation/audit cases.
+- **Exit:** a recruiter invited through the approved Auth path can access only their own active contact/company and explicitly granted, unexpired published-drive metadata; no recruiter can enumerate records or access student, skill, evidence, document, resume, application, or applicant data.
+
+**Approved specification:** companies remain internal-only and retain their existing archive lifecycle; no company `DRAFT`/`PUBLISHED` state is introduced. A coordinator may read and create/edit only their own unarchived, never-invited drafts. Secretary/Super Admin conduct normal lifecycle, invitations, and grant operations through audited procedures. Recruiter invitations use Supabase Auth's expiring invite secret plus an internal status record, never a custom token/verifier. Reissue must use a locally proven supported Supabase Admin resend mechanism and must not delete/recreate a confirmed Auth user.
 
 ## Phase 7 — Drives and eligibility
 

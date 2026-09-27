@@ -21,3 +21,9 @@ Target semantic HTML, keyboard-only completion of core journeys, visible focus, 
 ## Data and privacy presentation
 
 Show only necessary student/recruiter fields in each context. Mask or omit private contact/academic data when not needed. Never put a signed document URL into a rendered long-lived record, table export, client state, or analytics payload. Application status history should show a clear timestamp/status and permitted note without exposing internal-only deliberation.
+
+## Phase 6 employer surfaces
+
+Company and recruiter staff pages are compact operational views, not a CRM: paginated/filterable company list, focused company detail/edit, contact list, invitation status/actions, archive/reactivation, and published-drive grant/revoke. Use clear state badges plus text, URL-reflected filters/pages, empty/permission/error states, and confirmation dialogs that name the company/contact and downstream recruiter-access effect. Coordinator screens hide unavailable actions as a convenience but server/database denial remains authoritative.
+
+The recruiter self-view displays only own contact, company, and granted-drive metadata. It never renders invitation URLs/tokens, grant flags, student data, or applicant/document controls. Ensure archive/revocation/expired-invitation states give a generic safe support message without disclosing another record's existence.

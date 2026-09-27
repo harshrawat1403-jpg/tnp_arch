@@ -10,6 +10,8 @@ Keep public routes small: system or carefully subsetted fonts, optimized image d
 
 Paginate every growth-prone list; filter/sort/aggregate in PostgreSQL with indexes and tight selected columns. Never fetch all students/applications to the browser for filtering, charts, or export. Prevent N+1 queries by shaping joins/batched queries intentionally and inspect query plans/slow operation logs for hot screens. Use Suspense/streaming only when it improves perceived latency without confusing state; add route-level loading UI for slower pages.
 
+Phase 6 company and recruiter lists use URL-driven SQL pagination with page size 20 and deterministic normalized-name/full-name plus ID ordering. The company list does not join every contact/grant; contacts paginate under a selected company and grants query only the selected recruiter/drive relationship. Recruiter self-view selects a single contact/company and bounded unexpired published grants. Do not fetch all employer records client-side or poll invitation status.
+
 Authenticated data is dynamic/private by default. Cache only data with an explicit audience and invalidation story. Use cache tags/revalidation carefully after public content changes. Do not cache personalized dashboards in shared output.
 
 ## Storage and provider-cost guardrails

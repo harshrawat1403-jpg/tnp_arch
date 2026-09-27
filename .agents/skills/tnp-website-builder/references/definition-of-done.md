@@ -17,6 +17,8 @@ A feature is complete only when applicable items are evidenced, not merely asser
 
 For normalized skills specifically, completion also requires evidence that the legacy-array cutover is one-way and exact-normalization-only, ambiguity has a manual-review record, coordinator review is course/batch scoped, verified skills are student-immutable, and cross-owner evidence-document references fail at the database boundary. Advisory matching must be demonstrated as non-gating: it cannot alter drive eligibility or application authorization.
 
+For Phase 6 specifically, completion requires a clean local migration/RLS rehearsal; a locally proven Supabase Admin invitation/reissue integration; confirmed-email, one-to-one recruiter-account binding; replay/expiry/revocation/archive denial evidence; default-deny direct REST/RLS tests; sanitized audit assertions; and recruiter proof that only own active contact/company plus granted unexpired published-drive metadata is available. It also requires evidence that applicant/resume flags remain ineffective, no browser receives an Admin secret, grant revocation preserves history, staff/recruiter pages use bounded deterministic pagination, and no Phase 7+ drive/application functionality was introduced.
+
 ## Evidence standard
 
 Report exact commands/checks and their outcome, migration environment, representative manual checks, and known limitations. “Not run” is acceptable only when stated with the reason and remaining risk; it is not evidence of completion. A skipped release gate means the feature is incomplete for that environment, even if the code is ready for further development.
