@@ -1,6 +1,6 @@
 # TNP Portal
 
-The Training & Placement portal has completed **Phase 4: Student Profiles**. The application now has server-first Supabase Auth session handling, roster-gated student registration, a completeness-only student workspace, narrow profile/academic mutations, and private resume storage under least-privilege RLS. Recruiter, company, student-administration, drive, application, announcement, export, and placement workflows remain deliberately deferred.
+The Training & Placement portal is implementing **Phase 6: Companies and Recruiters**. The application uses server-first Supabase Auth session handling, roster-gated student registration, normalized student skills, and a bounded company/recruiter lifecycle under least-privilege RLS. Drive creation, eligibility, applications, applicant browsing, matching, alumni, analytics, exports, and notifications remain deliberately deferred.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ The Training & Placement portal has completed **Phase 4: Student Profiles**. The
 
 ## Local development
 
-1. Copy `.env.example` to `.env.local`. Set the local Supabase URL and **publishable** key from `npx supabase status`; do not add a secret/service-role key.
+1. Copy `.env.example` to `.env.local`. Set the local Supabase URL and **publishable** key from `npx supabase status`. The recruiter-invitation flow additionally needs a server-only `SUPABASE_SECRET_KEY`; never use a `NEXT_PUBLIC_` name for it or commit its value.
 2. Run `npm install`.
 3. Run `npm run dev` and open `http://localhost:3000`.
 
@@ -38,13 +38,14 @@ npm run db:stop
 
 `db:verify:local` resets **only** the local disposable database, applies every version-controlled migration, lints the schema, and runs the pgTAP tests. It never uses `--linked`, `db push`, or production credentials. For a schema change: add a new migration, inspect it, run the local verification sequence, update the relevant documentation/tests, then use staging and production processes only in their approved later phases.
 
-## Authentication and student-profile foundation
+## Authentication and bounded operational foundation
 
 - `/register` permits an account only when a confirmed institutional email matches an active, unconsumed protected roster entry. It has no role selection path; provisioning creates only `STUDENT` access.
-- `/login` provides password sign-in for approved accounts, and `/account` remains a minimal protected session/role confirmation route.
-- `/student` is a readiness-only dashboard; `/student/profile` contains personal, pending academic, and private PDF-resume forms. There is no staff list, verification queue, drive, or application UI in this phase.
+- `/login` provides password sign-in for approved accounts, and `/account` links an authenticated role to its bounded workspace.
+- `/student` is a readiness-only dashboard; `/student/profile` contains personal, pending academic, and private PDF-resume forms. `/tnp/skills` provides bounded skill administration, and `/tnp/companies` provides bounded company/recruiter administration.
+- `/recruiter` exposes only the recruiter’s own active contact, company, and explicitly granted published-drive metadata. It does not expose students, applications, resumes, skills, or evidence.
 - `src/proxy.ts` refreshes Supabase sessions; protected Server Components independently validate claims and resolve the active profile through RLS.
-- Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are used by the application. A service-role key is neither required nor supported by this phase.
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are browser-safe connection values. `SUPABASE_SECRET_KEY` is server-only and used solely by the narrow recruiter invitation hand-off; it never replaces caller authorization or RLS.
 - Follow [supabase/BOOTSTRAP.md](supabase/BOOTSTRAP.md) for the one-time Super Admin bootstrap in a protected operator environment.
 
 ## Conventions
@@ -52,6 +53,6 @@ npm run db:stop
 - The App Router lives in `src/app`; its components are Server Components unless a browser API or interaction actually requires `"use client"`.
 - Shared layout/brand primitives live in `src/components`; small framework-neutral utilities live in `src/lib`.
 - `NEXT_PUBLIC_APP_URL` is optional in development and, when set, must be an absolute HTTP(S) URL. Validation occurs at application startup through `src/lib/environment.ts`.
-- `supabase/migrations/` is the only schema source of truth. Phase 4 adds a reviewed Auth roster hook, narrowly scoped student RLS/RPC boundaries, audited academic verification/correction, and a private resume bucket; later workflow phases add operations and policies only when needed.
+- `supabase/migrations/` is the only schema source of truth. Phase 6 extends the single Auth hook to accept matching recruiter invitations and adds audited, narrow company/recruiter/invitation/grant procedures; later workflow phases add operations and policies only when needed.
 - The real approved black 2D department logo has not been supplied to this repository. Do not invent or recolor it. When supplied, place the original asset at `public/brand/department-logo-black.svg` and replace the temporary text identity in `src/components/brand/department-identity.tsx` in the same reviewed change.
 - See `.agents/skills/tnp-website-builder/` for the canonical product, security, and phase guidance.

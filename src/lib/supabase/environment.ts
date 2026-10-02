@@ -8,6 +8,14 @@ export type SupabaseEnvironment = {
   url: URL;
 };
 
+export type SupabaseAdminEnvironmentInput = SupabaseEnvironmentInput & {
+  secretKey?: string | undefined;
+};
+
+export type SupabaseAdminEnvironment = SupabaseEnvironment & {
+  secretKey: string;
+};
+
 function getRequiredValue(value: string | undefined, variableName: string): string {
   const trimmedValue = value?.trim();
 
@@ -56,4 +64,25 @@ export function getOptionalSupabaseEnvironment(): SupabaseEnvironment | null {
   }
 
   return validateSupabaseEnvironment({ url, publishableKey });
+}
+
+export function validateSupabaseAdminEnvironment(
+  input: SupabaseAdminEnvironmentInput,
+): SupabaseAdminEnvironment {
+  const environment = validateSupabaseEnvironment(input);
+  const secretKey = getRequiredValue(input.secretKey, "SUPABASE_SECRET_KEY");
+
+  if (secretKey.startsWith("sb_publishable_")) {
+    throw new Error("SUPABASE_SECRET_KEY must be a server-only Supabase secret key.");
+  }
+
+  return { ...environment, secretKey };
+}
+
+export function getSupabaseAdminEnvironment(): SupabaseAdminEnvironment {
+  return validateSupabaseAdminEnvironment({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    secretKey: process.env.SUPABASE_SECRET_KEY,
+  });
 }

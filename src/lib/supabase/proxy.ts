@@ -8,6 +8,8 @@ function isProtectedPath(pathname: string): boolean {
     pathname === "/account" ||
     pathname === "/student" ||
     pathname.startsWith("/student/") ||
+    pathname === "/recruiter" ||
+    pathname.startsWith("/recruiter/") ||
     pathname === "/tnp" ||
     pathname.startsWith("/tnp/")
   );

@@ -422,6 +422,20 @@ a {
   padding-left: 1.2rem;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  color: var(--ink-muted);
+}
+
+.pagination a {
+  color: var(--ink);
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
 .profile-form input[type="file"] {
   padding: 0.55rem;
 }

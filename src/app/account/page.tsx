@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { signOut } from "@/app/login/actions";
 import { getCurrentIdentity } from "@/lib/supabase/current-identity";
@@ -20,8 +21,18 @@ export default async function AccountPage() {
         Signed in as {identity.displayName}. Your protected platform role is {identity.role}.
       </p>
       <p className="foundation__note">
-        Product workspaces are introduced only in their approved later phases.
+        Your protected role determines the operational workspace available to you.
       </p>
+      {identity.role === "RECRUITER" ? (
+        <Link className="text-link" href="/recruiter">
+          Open recruiter workspace
+        </Link>
+      ) : null}
+      {["SUPER_ADMIN", "TNP_SECRETARY", "TNP_COORDINATOR"].includes(identity.role) ? (
+        <Link className="text-link" href="/tnp/companies">
+          Open companies and recruiters
+        </Link>
+      ) : null}
       <form action={signOut}>
         <button className="text-link" type="submit">
           Sign out
