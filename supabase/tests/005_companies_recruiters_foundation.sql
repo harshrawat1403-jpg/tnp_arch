@@ -275,6 +275,8 @@ select is((select count(*)::integer from public.audit_logs), 0, 'a recruiter can
 reset role;
 insert into public.placement_drives (id, company_id, title, drive_type, description, application_deadline, created_by, updated_by)
 values ('42000000-0000-0000-0000-000000000006', '42000000-0000-0000-0000-000000000001', 'Existing published drive', 'PLACEMENT', 'Existing record only', now() + interval '7 days', '41000000-0000-0000-0000-000000000002', '41000000-0000-0000-0000-000000000002');
+insert into public.drive_eligibility (drive_id) values ('42000000-0000-0000-0000-000000000006');
+insert into public.drive_eligible_batches (drive_id,course,batch_year) values ('42000000-0000-0000-0000-000000000006','B.Arch',2027);
 update public.placement_drives
 set status = 'PUBLISHED', published_at = now()
 where id = '42000000-0000-0000-0000-000000000006';
@@ -324,10 +326,14 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '41000000-0000-0000-0000-000000000001', true);
-select lives_ok(
+select throws_ok(
   $$select public.set_company_archive_state('42000000-0000-0000-0000-000000000001', true)$$,
-  'the Super Admin can archive a company while a grant is revoked'
+  '23514', null, 'even a revoked grant cannot permit company archive while its drive is published'
 );
+-- Phase 7 requires explicit drive closure before company archival.
+select public.transition_drive('42000000-0000-0000-0000-000000000006',
+  (public.staff_drive_detail('42000000-0000-0000-0000-000000000006')->>'revision')::integer, 'CLOSED');
+select public.set_company_archive_state('42000000-0000-0000-0000-000000000001', true);
 select lives_ok(
   $$select public.set_company_archive_state('42000000-0000-0000-0000-000000000001', false)$$,
   'the Super Admin can reactivate a company without changing grant history'
@@ -361,10 +367,20 @@ select lives_ok(
   $$select public.set_recruiter_archive_state('42000000-0000-0000-0000-000000000002', false)$$,
   'the Super Admin can reactivate an active-company recruiter binding'
 );
+reset role;
+-- Closed drives never reopen: a fresh published fixture exercises re-grant.
+insert into public.placement_drives (id,company_id,title,drive_type,description,application_deadline)
+values ('42000000-0000-0000-0000-000000000010','42000000-0000-0000-0000-000000000001','New grant fixture','PLACEMENT','Fresh valid drive',now()+interval '7 days');
+insert into public.drive_eligibility(drive_id) values ('42000000-0000-0000-0000-000000000010');
+insert into public.drive_eligible_batches(drive_id,course,batch_year) values ('42000000-0000-0000-0000-000000000010','B.Arch',2027);
+update public.placement_drives set status='PUBLISHED',published_at=now() where id='42000000-0000-0000-0000-000000000010';
+set local role authenticated;
 select lives_ok(
-  $$select public.grant_recruiter_drive_access('42000000-0000-0000-0000-000000000002', '42000000-0000-0000-0000-000000000006', null)$$,
+  $$select public.grant_recruiter_drive_access('42000000-0000-0000-0000-000000000002', '42000000-0000-0000-0000-000000000010', null)$$,
   'the Super Admin can grant published-drive access after recruiter reactivation'
 );
+select public.transition_drive('42000000-0000-0000-0000-000000000010',
+  (public.staff_drive_detail('42000000-0000-0000-0000-000000000010')->>'revision')::integer,'CLOSED');
 select lives_ok(
   $$select public.set_company_archive_state('42000000-0000-0000-0000-000000000001', true)$$,
   'the Super Admin can archive a company non-destructively'

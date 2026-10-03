@@ -278,6 +278,10 @@ values (
   now() + interval '2 days'
 );
 
+insert into public.drive_eligibility (drive_id)
+select id from public.placement_drives where title = 'Archival test drive';
+insert into public.drive_eligible_batches (drive_id, course, batch_year)
+select id, 'B.Arch', 2027 from public.placement_drives where title = 'Archival test drive';
 update public.placement_drives
 set status = 'PUBLISHED', published_at = now()
 where id = '30000000-0000-0000-0000-000000000002';

@@ -28,6 +28,16 @@ export default async function AccountPage() {
           Open recruiter workspace
         </Link>
       ) : null}
+      {identity.role === "STUDENT" ? (
+        <Link className="text-link" href="/student/drives">
+          View published drives
+        </Link>
+      ) : null}
+      {["SUPER_ADMIN", "TNP_SECRETARY", "TNP_COORDINATOR"].includes(identity.role) ? (
+        <Link className="text-link" href="/tnp/drives">
+          Manage drives and eligibility
+        </Link>
+      ) : null}
       {["SUPER_ADMIN", "TNP_SECRETARY", "TNP_COORDINATOR"].includes(identity.role) ? (
         <Link className="text-link" href="/tnp/companies">
           Open companies and recruiters

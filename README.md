@@ -1,6 +1,27 @@
 # TNP Portal
 
-The Training & Placement portal is implementing **Phase 6: Companies and Recruiters**. The application uses server-first Supabase Auth session handling, roster-gated student registration, normalized student skills, and a bounded company/recruiter lifecycle under least-privilege RLS. Drive creation, eligibility, applications, applicant browsing, matching, alumni, analytics, exports, and notifications remain deliberately deferred.
+The Training & Placement portal is implementing **Phase 7: Drives and Eligibility**. The application uses server-first Supabase Auth session handling, roster-gated student registration, normalized student skills, and bounded company/recruiter and drive lifecycles under least-privilege RLS. Applications, applicant browsing, matching, alumni, analytics, exports, and notifications remain deliberately deferred.
+
+## Drives and eligibility
+
+`/tnp/drives` provides bounded draft editing for both Coordinators and audited
+publication/correction/closure/archive for the Secretary and Super Admin.
+Published corrections require the current revision, an internal reason and a
+student-facing notice. Closed/archived content cannot be edited or reopened.
+Companies with any published drive (including expired ones) cannot be archived.
+
+`/student/drives` lists only published drives, including expired published drives,
+using SQL-filtered 20-row pages. A caller-bound database assessment uses exact
+protected roster course/batch pairs and verified academic CGPA/backlogs. Missing
+or unverified academics remain undetermined; overall profile completeness, skills
+and resume readiness are not eligibility gates. Prior placement exclusion is
+optional and uses current selected placement truth, not selection history.
+Deadlines are exclusive database timestamps. No Apply button or application API
+is introduced. Recruiter metadata grants and column projections remain unchanged.
+
+The additive `20261003000000_drives_eligibility_foundation.sql` migration refuses
+incompatible historical lifecycle/criteria data rather than inventing a backfill.
+Review any such data explicitly before a separately authorized hosted rollout.
 
 ## Recruiter onboarding
 

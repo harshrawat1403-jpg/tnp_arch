@@ -12,9 +12,12 @@ export default async function StudentDashboardPage() {
       <p className="foundation__eyebrow">Student profile</p>
       <h1 id="student-dashboard-title">Welcome, {profile.identity.displayName}.</h1>
       <p className="student-page__summary">
-        This workspace currently shows only your profile readiness. Placement workflows will appear
-        only in their approved phases.
+        Review your profile readiness and published opportunities. Profile completeness is separate
+        from database-derived drive eligibility; application submission remains deferred.
       </p>
+      <Link className="text-link" href="/student/drives">
+        View published drives and my eligibility
+      </Link>
       <div className="student-status" aria-live="polite">
         <p className="student-status__label">Profile readiness</p>
         <p className="student-status__value">
