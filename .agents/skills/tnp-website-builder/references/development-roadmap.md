@@ -75,12 +75,16 @@ The phases are gates, not a reason to write every feature at once. Complete prer
 
 ## Phase 7 — Drives and eligibility
 
-- **Objective:** publish trustworthy placement/internship opportunities with explainable eligibility.
-- **Prerequisites:** Phases 4–6 and backlog/eligibility decisions.
-- **Tasks:** drive CRUD/archive/publish/close, batches, eligibility criteria, student listing/detail, reason-code UI.
-- **Database/security:** lifecycle checks, indexed eligibility query path, audited published changes.
-- **Tests:** eligibility matrix/boundaries, unpublished/closed denial, mobile detail/performance check.
-- **Exit:** eligibility is identical at display and server-authorized application time, with clear reasons.
+- **Status:** specification finalized; implementation and verification are pending. This approval does not authorize Phase 8 or mark Phase 7 complete.
+- **Objective:** publish trustworthy placement/internship opportunities with deterministic, explainable eligibility independent of skills and overall profile verification/completeness.
+- **Prerequisites:** completed Phases 4–6 and the approved [Phase 7 addendum](phase-0-specification-freeze.md#approved-phase-7-extension--drives-and-eligibility).
+- **Tasks:** shared coordinator draft create/edit; Secretary/Super Admin publish/close/archive and one protected published-correction path; existing relational criteria; display-only student list/detail; URL-driven SQL pagination; academic/availability/reason presentation; latest student-facing correction notice. No ordinary drive deletion.
+- **Database/security:** reuse `placement_drives`, `drive_eligible_batches`, and `drive_eligibility`; add only approved revision/notice metadata plus needed protected operations/invariants. Preserve exact chronological `DRAFT -> PUBLISHED -> CLOSED -> ARCHIVED` lifecycle, closed/archived immutability, active-company/future-deadline/complete-criteria publication, and company-archive denial while any drive is published. Authoritative inputs are protected roster course/batch and verified CGPA/current-active backlogs, plus optional current selected-placement exclusion. Use one database calculation and narrow student/staff projections; no broad authenticated column/mutation grants or recruiter access expansion.
+- **Tests:** academic criteria/availability/code matrix, missing/unverified academic `UNDETERMINED`, no profile/skill gate, current-state placement exclusion on either target type, exact deadline, all role/REST/RLS denials, lifecycle chronology/immutability, company-archive/publication races, stale published corrections/notice/audit, bounded pagination/no N+1, recruiter regressions, and mobile/keyboard/performance review.
+- **Exit:** list/detail invoke the same authoritative calculation prepared for future Phase 8 authorization; academic result and availability are separate with canonical reasons and hidden-ID non-enumeration. All role/integrity/correction/audit boundaries have database and authenticated journey evidence; the 20-row student list is deterministic and bounded. Clean local migration/lint/pgTAP plus typecheck/lint/unit/build and changed-file formatting checks pass, with unrelated baseline formatting issues reported separately.
+- **Exclusions:** application creation/withdrawal, applicant lists, shortlist/interview/select/reject, application-history UI, applicant resume sharing, matching/ranking, career roles, notifications, exports, analytics, alumni, and announcements. Reading current application state internally for the approved exclusion is not an application workflow grant.
+
+**Frozen rules:** company/type are immutable after publication. Every published content/criteria correction requires Secretary/Super Admin, internal reason, student notice, stale revision check, atomic change, revision increment, and before/after audit. A published deadline cannot be extended after expiry; expiry itself requires no automatic status mutation or scheduler. Preserve Phase 6 recruiter grant behavior exactly. Future Phase 8 must reuse the database calculation inside its application transaction; Phase 7 cannot claim application-time execution evidence before that phase exists.
 
 ## Phase 8 — Applications and selection pipeline
 

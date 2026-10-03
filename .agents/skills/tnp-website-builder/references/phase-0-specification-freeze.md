@@ -1,6 +1,6 @@
 # Phase 0 specification freeze
 
-**Status:** complete for Phase 1, with approved Phase 5 student-skills and Phase 6 company/recruiter specification addenda. This is the canonical V1 decision record. Later changes require an explicit documented product decision and an update to the affected references.
+**Status:** complete for Phase 1, with approved Phase 5 student-skills, Phase 6 company/recruiter, and Phase 7 drives/eligibility specification addenda. Phase 7 is specification-approved only; its implementation and verification remain pending. This is the canonical V1 decision record. Later changes require an explicit documented product decision and an update to the affected references.
 
 ## Product boundary and visual direction
 
@@ -35,7 +35,7 @@ There is no public administrative registration, self-service role conversion, mu
 | Exports/basic statistics                     | Own history only                                                             | No export                                | Aggregate dashboard only; no PII export                                             | Scoped operational exports/statistics                               | Full                             |
 | Roles, critical config, recovery, full audit | No                                                                           | No                                       | No                                                                                  | No                                                                  | Exclusively Super Admin          |
 
-Coordinators cannot publish/archive drives, assign roles, alter critical settings, export PII, select candidates, correct terminal statuses, or access full audit logs. Recruiters cannot list students, change application status, export data, access documents by default, or infer activity outside a grant. These controls are enforced by server logic and database/RLS policies; UI hiding is only convenience.
+Coordinators cannot publish/close/archive drives, correct published drives, assign roles, alter critical settings, export PII, select candidates, correct terminal statuses, or access full audit logs. Both coordinators may create/edit any drive in `DRAFT`; this shared drive permission is distinct from their own-uninvited company/contact draft permission and course/batch-scoped student review. Recruiters cannot list students, change application status, export data, access documents by default, or infer activity outside a grant. These controls are enforced by server logic and database/RLS policies; UI hiding is only convenience.
 
 ## Data ownership, sensitivity, and lifecycle
 
@@ -86,11 +86,64 @@ An active recruiter may read only their own contact, active assigned company, an
 
 Every company, contact, invitation, recruiter archive/reactivation, and grant/revocation transition is an audited protected operation. Audit payloads contain only sanitized identifiers and state/reason metadata; they never contain links, tokens, OTPs, signed URLs, passwords, Admin secrets, or raw provider errors.
 
-## Drives, eligibility, and applications
+## Approved Phase 7 extension — drives and eligibility
 
-Drive lifecycle is `DRAFT -> PUBLISHED -> CLOSED -> ARCHIVED`; `ARCHIVED` is terminal. A published drive can be closed; any material published eligibility change is a TNP Secretary action with audit evidence and a clear student-facing impact notice. Applications are accepted only while `PUBLISHED`, before deadline, and when deterministic eligibility succeeds.
+Phase 7 publishes placement/internship opportunities and displays deterministic, explainable eligibility. Reuse `placement_drives`, `drive_eligible_batches`, `drive_eligibility`, `companies`, and the existing application/audit records. Do not replace these models or implement application workflows in this phase.
 
-Machine-enforced eligibility fields are eligible course/batch, minimum CGPA, maximum **current active** backlogs, and optional `exclude_previously_selected_placement`. It defaults to false; when true, a student with a prior `SELECTED` placement application is ineligible. There is no global automatic placement lock. “Other requirements” are visible informational terms only in V1, not hidden discretionary gates. A new eligibility criterion must be structured, explainable, migration-backed, tested, and approved before becoming gating logic.
+### Lifecycle, company archive, and deadlines
+
+Drive lifecycle remains exactly `DRAFT -> PUBLISHED -> CLOSED -> ARCHIVED`. There is no reopening, unarchive, `DRAFT -> ARCHIVED`, or ordinary deletion. `CLOSED` content and criteria are read-only except the `CLOSED -> ARCHIVED` transition; archived content and criteria are immutable. Lifecycle metadata must satisfy `created_at <= published_at <= closed_at <= archived_at` for timestamps required by the current state, with later-state metadata absent until its transition.
+
+A company cannot be archived while it has any `PUBLISHED` drive, including an expired published drive. Staff must explicitly close those drives first. An archive attempt must not automatically change drive lifecycle. Publication requires an active company, a future deadline, exactly one eligibility row, at least one explicit eligible `(course, batch_year)` pair, and valid criteria. Drafts under an archived company remain non-publishable until company reactivation. This company-archive guard is an approved Phase 7 addition to the Phase 6 operation, not a claim that the existing implementation already enforces it.
+
+Use database `timestamptz`. Availability is `status = PUBLISHED AND database_evaluation_time < application_deadline`; equality with the deadline is already not open for future application authorization. Expiry does not mutate lifecycle, requires no cron/scheduler, and leaves an expired `PUBLISHED` drive visible with a deadline-passed state. A published deadline correction uses the protected correction operation with reason, notice, and audit. Before expiry, a replacement deadline must remain in the future; after expiry, deadline extension/reopening is prohibited.
+
+### Eligibility authority and calculation
+
+The only machine criteria are an exact eligible course/batch pair, minimum CGPA, maximum **current active** backlogs, and optional `exclude_previously_selected_placement` (default false). Course/batch come from protected `student_roster.course` and `student_roster.batch_year`; CGPA and backlog count come only from a verified `academic_records` row. Skills, skill verification/evidence, overall `student_profiles.verification_status`, profile completeness, and resume readiness must not influence eligibility. Overall profile verification is not an eligibility prerequisite.
+
+The exclusion flag may be configured on either a `PLACEMENT` or `INTERNSHIP` target drive. It excludes a student only when an application currently has `current_status = SELECTED` and its associated drive is `PLACEMENT`. A selected internship does not count. A later approved audited terminal correction changes the authoritative current state; historical selection events alone do not perpetuate exclusion. There is no global placement lock. “Other requirements” are informational only. Any new machine criterion requires a later explicit decision, structured schema, migration, tests, and an explainable reason code.
+
+Freeze one database-backed calculation shared by student list/detail and future Phase 8 application authorization. Public/student entry points derive identity from `auth.uid()` and never accept a student ID, course, batch, CGPA, backlog count, or evaluation time from the caller. Keep the academic result (`PASS`, `FAIL`, `UNDETERMINED`), availability state, and ordered structured reasons separate. Missing or unverified academic data produces `UNDETERMINED`; do not invent a numerical failure or treat unavailable data as zero. No mutable `is_eligible` is stored. A future application transaction must recompute using this same calculation against protected current state.
+
+| Machine reason code             | Meaning                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `ELIGIBLE`                      | Academic criteria pass and the published drive is open, with no blocking reason. |
+| `COURSE_NOT_ELIGIBLE`           | No allowed course/batch pair contains the student's protected course.            |
+| `BATCH_NOT_ELIGIBLE`            | The course is represented, but the student's exact course/batch pair is absent.  |
+| `CGPA_BELOW_MINIMUM`            | Verified CGPA is below the configured minimum.                                   |
+| `ACTIVE_BACKLOG_LIMIT_EXCEEDED` | Verified current active backlogs exceed the configured maximum.                  |
+| `PREVIOUSLY_SELECTED_PLACEMENT` | The configured exclusion flag finds a currently selected placement application.  |
+| `ACADEMIC_DATA_UNAVAILABLE`     | The current academic record is missing.                                          |
+| `ACADEMIC_UNVERIFIED`           | The current academic record is not verified.                                     |
+| `DEADLINE_PASSED`               | Database evaluation time is at or after the deadline.                            |
+| `DRIVE_CRITERIA_UNAVAILABLE`    | Required structured criteria are missing or invalid; authorization fails closed. |
+
+Reason ordering is deterministic: availability, criteria configuration, academic-data readiness, then course, batch, CGPA, backlogs, and prior selection. Return only applicable reasons, suppress comparisons that depend on missing/unverified academic inputs, and emit `ELIGIBLE` only without blockers. Internal authorization may distinguish `DRIVE_NOT_PUBLISHED`, `DRIVE_CLOSED`, and `DRIVE_ARCHIVED`; student detail/RPC responses must use a generic unavailable/not-found outcome for hidden or nonexistent IDs and must not permit hidden-state enumeration. Overall profile verification has no machine reason code.
+
+### Staff mutations, published correction, and metadata
+
+Both TNP Coordinators may create/edit any `DRAFT` drive; there is no per-coordinator drive ownership restriction. They cannot publish, close, archive, or correct published drives. TNP Secretary/Super Admin perform these operations through audited role-checking procedures, with no generic administrative bypass or broad authenticated mutation grants.
+
+Once `PUBLISHED`, every permitted content/criteria change uses one protected published-correction operation. There is no subjective normal-edit versus material-edit exception. It requires Secretary/Super Admin authority, an internal reason, a student-facing change notice, a stale revision check, atomic mutation, revision increment, and sanitized before/after audit. `company_id` and `drive_type` are immutable after publication. A notice cannot be cleared by unrelated actions. Published corrections emit `drive.updated` with a published/material classification; eligibility changes additionally emit `drive.eligibility_updated`.
+
+Approved additive drive metadata is `revision integer NOT NULL DEFAULT 1`, `last_material_change_notice text NULL`, and `last_material_change_at timestamptz NULL`. Notice/time must be present together; notice and mandatory correction reason are bounded to 1–2000 trimmed characters. Revision increments on every successful content/criteria mutation. Audit logs retain historical changes; the drive stores only the latest student-facing notice/time. Lifecycle/publish/correction integrity is database-enforced where appropriate.
+
+Required events are `drive.created`, `drive.updated`, `drive.published`, `drive.closed`, `drive.archived`, and `drive.eligibility_updated`. Audit payloads contain sanitized drive/criteria before/after values and reasons, never student academic values, secrets, signed URLs, recruiter invitation data, or raw provider errors. Full audit access remains Super Admin-only.
+
+### Read projections, performance, and phase boundary
+
+Use narrow role-checking database projections/RPCs for student list/detail and richer staff reads; do not broaden shared `authenticated` base-table column grants to obtain descriptions, compensation, criteria, or internal metadata. Preserve Phase 6 recruiter grant behavior and its published metadata projection exactly; recruiters receive no eligibility results or student lists and applicant/resume flags remain ineffective.
+
+Student detail may expose company name, title, type, location, deadline, description, `package_lpa`, `stipend_monthly`, `compensation_details`, structured criteria, informational requirements, caller eligibility/reasons, and latest change notice/time. It must not expose recruiter contacts, applicants/counts, audit metadata, internal notes, or other-student data. `/student/drives` and `/student/drives/[driveId]` are display-only Phase 7 surfaces, with no Apply action.
+
+Student listing uses page size 20, SQL-side filtering, one-row lookahead, deterministic `(application_deadline ASC, id ASC)` ordering, and one bounded database call for the page plus eligibility, without N+1 queries. If an eligibility filter is exposed, it runs before pagination. Index additions require query-shape/`EXPLAIN` evidence. Staff lists are also SQL-paginated with URL-driven filters and deterministic ordering.
+
+Phase 7 excludes application creation/withdrawal, applicant lists, shortlist/interview/select/reject operations, application-history UI, applicant resume sharing, matching/ranking, career roles, notifications, exports, analytics, alumni, and announcements. Application tables may be read internally only for the approved prior-selected-placement check; they acquire no public workflow grants in Phase 7.
+
+## Applications — Phase 8 boundary
+
+Applications are accepted in Phase 8 only while `PUBLISHED`, before deadline, and when the same authoritative eligibility calculation succeeds. The following frozen V1 application policy is not Phase 7 implementation scope.
 
 | Current state                       | Normal next state         | Authorized actor                                                         |
 | ----------------------------------- | ------------------------- | ------------------------------------------------------------------------ |
@@ -103,6 +156,8 @@ Machine-enforced eligibility fields are eligible course/batch, minimum CGPA, max
 Students cannot withdraw after shortlisting or deadline. A withdrawn application cannot be re-applied in V1. Terminal correction is not a normal transition: only Super Admin may invoke a separate audited correction that restores the immediately preceding non-terminal state, records mandatory reason plus old/new state in immutable history, and never deletes prior evidence.
 
 ## Required journeys and acceptance criteria
+
+These are eventual V1 journeys, not permission to implement later phases. Phase 7 acceptance is display-only student discovery plus bounded staff drive operations under its approved addendum; application submission/withdrawal/history and other later-phase journeys remain deferred.
 
 | Journey                       | V1 acceptance criteria                                                                                                                                                                                             |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

@@ -20,7 +20,7 @@
 | Assign/remove admin roles                               | No           | No                                         | No                                                                                           | No                              | Exclusively                    |
 | Critical configuration, recovery, full audit access     | No           | No                                         | No                                                                                           | No                              | Exclusively                    |
 
-The matrix is a minimum: implement exact operation-level grants, not a broad “admin” bypass. The Phase 0 decision is that coordinators may only perform the listed non-selection pipeline transitions, cannot export PII or publish/archive drives, and cannot perform terminal corrections; the TNP Secretary conducts normal selection workflow and the Super Admin handles exceptional recovery.
+The matrix is a minimum: implement exact operation-level grants, not a broad “admin” bypass. Coordinators may only perform the listed non-selection pipeline transitions in their later approved phase, cannot export PII or publish/close/archive/correct published drives, and cannot perform terminal corrections; the TNP Secretary conducts normal selection workflow and the Super Admin handles exceptional recovery.
 
 ## Approved Phase 5 skill authority
 
@@ -35,6 +35,23 @@ Companies are internal-only and have no publish state. A coordinator may read th
 `TNP_SECRETARY` and `SUPER_ADMIN` may manage normal company/contact lifecycle, invitation issue/reissue/revoke, recruiter archive/reactivation, and grants for existing published drives. A Super Admin has no arbitrary recruiter rebinding power: recovery must be a documented, separately approved operation. Recruiter acceptance is performed only by the recipient through Supabase Auth plus the identity-derived binding procedure; no staff role can manually accept an invitation.
 
 An active recruiter reads only their own active contact, active assigned company, and explicitly granted unexpired published-drive metadata. They cannot access profiles, students, skills, evidence, documents, resumes, applications, applicants, audit data, exports, or unrelated company/recruiter records. Applicant/resume grant flags remain inactive in Phase 6.
+
+## Approved Phase 7 drive authority
+
+| Operation                               | Student                           | Recruiter                                | Coordinator                              | TNP Secretary / Super Admin              |
+| --------------------------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Read drives                             | Published student projection only | Existing granted published metadata only | Staff projection across lifecycle states | Staff projection across lifecycle states |
+| Read student eligibility                | Caller only                       | No                                       | No student eligibility directory         | No student eligibility directory         |
+| Create/edit draft and criteria          | No                                | No                                       | Any `DRAFT`, regardless of creator       | Any `DRAFT`                              |
+| Publish / close / archive               | No                                | No                                       | No                                       | Protected audited operation              |
+| Correct published content/criteria      | No                                | No                                       | No                                       | One protected audited correction path    |
+| Mutate closed/archived content/criteria | No                                | No                                       | No                                       | No; closed permits only archival         |
+
+Shared drive drafts have no per-coordinator ownership restriction. Existing company/contact own-uninvited permissions and coordinator student course/batch scopes remain separate boundaries. Secretary/Super Admin use ordinary audited drive operations, not a generic bypass. Publication requires active company, future deadline, complete valid criteria, and explicit course/batch pairs. Company archive is denied while any drive is `PUBLISHED`; staff close it first without an automatic transition during archival.
+
+Published corrections require internal reason, student-facing notice, stale revision check, atomic mutation, revision increment, and before/after audit. Company/type are immutable after publication; expired deadlines cannot be extended. Closed/archived content and criteria are protected. Richer student/staff reads use narrow role-checking RPC projections rather than shared base-table grant expansion. Recruiter grants and metadata boundaries remain unchanged, including ineffective applicant/resume flags.
+
+Academic eligibility uses protected roster course/batch and verified CGPA/current-active backlogs; skills and overall profile verification/completeness have no eligibility authority. Student entry points derive `auth.uid()` and cannot accept another identity or academic facts. Hidden drive IDs yield generic unavailability, and no application mutation or applicant workflow is enabled in Phase 7.
 
 ## Enforcement model
 

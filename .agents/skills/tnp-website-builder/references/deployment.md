@@ -24,6 +24,18 @@ Deploy backward-compatible schema changes before code that depends on them when 
 
 Production backup/point-in-time recovery options and responsibilities must be verified against the chosen provider plan before launch. The Technical Secretary owns the protected recovery decision; restoration is an exceptional, audited operation after scope assessment.
 
+## Approved Phase 7 rollout boundary
+
+Phase 7 specification finalization changes only the 13 approved references. It creates no migrations, application code, test files, README update, provider resources, Auth changes, new Admin client, or deployment. Phase 7 implementation and any checkpoint/merge/deployment require their own approved work; Phase 8 is not authorized.
+
+The planned implementation uses additive migrations only, retaining the published baseline and Phase 6 migrations. Reuse `placement_drives`, `drive_eligible_batches`, and `drive_eligibility`; add `revision integer NOT NULL DEFAULT 1`, nullable latest-notice/time metadata with paired/bounded validation, and the approved integrity/procedure/projection protections. Before applying chronological constraints or publication prerequisites to existing data, inspect lifecycle timestamps, eligibility rows, and explicit course/batch pairs. Do not fabricate eligible cohorts, academic verification, or notice history to make legacy records pass. Surface incompatible existing records and obtain an approved repair plan before enforcing constraints that would fail.
+
+Treat the company archive guard as an intentional Phase 7 tightening of the existing protected Phase 6 operation: any published drive, expired or not, must be explicitly closed first; company archive never automatically changes drives. Rehearse publication/archive concurrency and update local regression fixtures accordingly during implementation. Preserve existing recruiter invitation/password/recovery behavior and granted metadata; keep applicant/resume flags ineffective and default-deny private-data access.
+
+Before release, require the complete local migration/lint/pgTAP run to finish successfully, exact executed assertion counts, role/RLS/direct-REST projection and mutation tests, correction/revision/audit tests, one authoritative eligibility calculation, paging/query-plan checks, typecheck/lint/unit/build/start, scoped formatting, and authenticated student/staff mobile/keyboard smoke evidence. Expiry uses database time and needs no cron, scheduler, new paid service, or provider quota assumption. A Docker or authorization-test blocker prevents implementation closure; documentation checks do not substitute for it.
+
+Record schema/application compatibility and a forward-fix/recovery owner. A rollback must not remove database archive/publication, role, or immutable-state protections to accommodate older UI. Older code may safely receive a protected denial; assess that behavior before release rather than weakening integrity. No production/shared reset, destructive data repair, hosted configuration change, secret rotation, or deployment is implied by specification approval.
+
 ## Lightweight health and observability
 
 Implement a minimal unauthenticated or appropriately protected `/api/health` endpoint that verifies application liveness and, if safe, a bounded database connectivity check. It returns no secrets, internal schema details, or user data. Use Vercel/Supabase platform logs and lightweight structured server logs first. Include timestamp, request/correlation ID, route/operation class, sanitized error category, and duration where useful.

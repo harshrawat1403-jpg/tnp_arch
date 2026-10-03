@@ -12,7 +12,13 @@ Paginate every growth-prone list; filter/sort/aggregate in PostgreSQL with index
 
 Phase 6 company and recruiter lists use URL-driven SQL pagination with page size 20 and deterministic normalized-name/full-name plus ID ordering. The company list does not join every contact/grant; contacts paginate under a selected company and grants query only the selected recruiter/drive relationship. Recruiter self-view selects a single contact/company and bounded unexpired published grants. Do not fetch all employer records client-side or poll invitation status.
 
+The approved Phase 7 student drive list uses URL/search-parameter paging with page size 20, one-row lookahead for Next, and deterministic `(application_deadline ASC, id ASC)` ordering. Apply SQL-side visibility and exposed filters before pagination, including eligibility filtering if offered. One bounded database projection/RPC returns the page and caller-specific eligibility together; resolve the trusted student/roster/academic context once per request, not through an application-side query per drive. Do not fetch all drives/students/applications client-side or fetch exact global counts merely for navigation.
+
+Reuse the existing drive/cohort/eligibility tables and indexes. Add an index only after the implemented query shape and `EXPLAIN` demonstrate a need; verify bounded row/column output and query plans on representative data. The optional prior-placement check reads current selected applications joined to placement drives, not all historical events. Keep one database-backed eligibility calculation, not a second browser/TypeScript engine. Phase 7 requires no new scheduler, polling, matching library, or dependency solely to calculate eligibility.
+
 Authenticated data is dynamic/private by default. Cache only data with an explicit audience and invalidation story. Use cache tags/revalidation carefully after public content changes. Do not cache personalized dashboards in shared output.
+
+Phase 7 own-eligibility results and staff drive pages stay private/dynamic. Never share-cache a projection containing caller-specific reasons, and do not cache stale academic/selection truth as a mutable `is_eligible` field. Expired published-drive display is evaluated using database time without automatically changing lifecycle. Keep student/staff surfaces server-first and preserve the existing lightweight typography, restrained tokens, and minimal client JavaScript.
 
 ## Storage and provider-cost guardrails
 

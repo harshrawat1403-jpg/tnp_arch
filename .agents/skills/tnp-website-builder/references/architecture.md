@@ -19,7 +19,7 @@ Use the Supabase browser client only for session-safe interactions whose RLS pol
 
 Keep the structure conventional and shallow. A suitable shape is `app/` for routes/layouts/loading/error states, `components/` for reusable UI, `lib/` for Supabase clients and shared safe utilities, `features/<domain>/` for focused domain logic/forms/queries, `supabase/migrations/` and `supabase/tests/` for database work, and `tests/` for application tests. Prefer direct feature-local code over repository/use-case abstractions unless duplication is proven.
 
-Separate pure eligibility, transition, and validation functions from transport/UI so they can be unit-tested. Keep server-only modules clearly marked and avoid importing them into client components.
+Separate pure input validation, reason presentation, transition helpers, and date/page parsing from transport/UI so they can be unit-tested. Eligibility has one authoritative database-backed calculation; do not create a competing TypeScript/client calculation. Keep server-only modules clearly marked and avoid importing them into client components.
 
 ## Phase 1 established conventions
 
@@ -64,6 +64,20 @@ Phase 6 remains server-first. Staff routes/actions use the cookie-backed caller 
 The invite supplies only the non-secret invitation row ID as Auth user metadata and redirects through an allowlisted callback. Admin invitations do not support PKCE: the configured invite email template sends the provider token hash to the server callback for `verifyOtp({ type: "invite" })`, while ordinary code callbacks retain `exchangeCodeForSession`. The Before User Created hook accepts either the existing student-roster path or a matching `PREPARED` recruiter invitation; the callback then invokes an identity-derived acceptance procedure after confirmed Auth exchange. The procedure is the only path that creates a recruiter profile and binds `recruiters.user_id`; replay fails after state advances from `SENT`. Accepted recruiters proceed to the narrow `/recruiter/setup-password` form, which uses caller-bound `auth.updateUser` and remains reachable from their workspace.
 
 Employer pages are dynamic Server Components with URL-driven, deterministic database pagination (20 rows) and minimal client controls. Recruiter pages select only the caller's own contact, company, and explicitly granted unexpired published-drive metadata. No recruiter route reads student, skill, evidence, document, resume, application, applicant, audit, or export data.
+
+## Approved Phase 7 drive and eligibility boundary
+
+The canonical drive and eligibility tables remain unchanged as models. Phase 7 adds approved revision/latest-notice fields, protected database operations, invariant enforcement, and bounded server-rendered surfaces only. Specification approval precedes implementation; no Phase 7 route/RPC/migration exists yet.
+
+Student `/student/drives` and `/student/drives/[driveId]` use the cookie-backed caller client and narrow role-checking database projections. Public entry points derive identity from `auth.uid()`; they accept neither student identity/academic facts nor evaluation time. A single database-backed calculation resolves protected roster course/batch, verified CGPA/current-active backlogs, and optional current selected-placement exclusion. It returns academic `PASS`/`FAIL`/`UNDETERMINED`, availability, and ordered reasons separately. It does not consult skills, overall profile verification/completeness, or resume readiness. The future Phase 8 application transaction must reuse this calculation rather than a client result.
+
+Shape the list as one bounded database call: SQL-filtered candidate page, size 20 plus one-row lookahead, `(application_deadline ASC, id ASC)` ordering, and set-based eligibility with shared student context. No per-drive network/RPC calls or repeated academic lookups. If eligibility filtering is exposed, it occurs before pagination. Student detail selects only the approved company-name/drive/compensation/criteria/own-result/latest-notice projection in the Phase 0 freeze; hidden IDs return generic unavailability.
+
+Staff reads may use separate narrow projections because students, recruiters, and staff share PostgreSQL's `authenticated` role. Expanding its base-table column grants would also expose those columns on recruiter-authorized rows. Preserve Phase 6 recruiter projections/RLS/grants and dormant applicant/resume flags. Drive operations use the caller client and role-checking audited procedures; the Supabase Admin invitation client has no role in drive administration.
+
+Both coordinators may edit any draft. Only Secretary/Super Admin publish/close/archive or perform a published correction. Every published content/criteria edit uses the same protected reason/notice/revision/audit operation; no lower-protection normal-edit path exists. Company/type lock after publication. Protect chronological lifecycle, complete-criteria publication, and closed/archived content immutability in the database. Company archive and drive publication must serialize consistently on the company relationship so a concurrent archive cannot leave a published drive under an archived company; reject archive while any published drive exists without automatically changing drive state.
+
+Use database `timestamptz` and a database-generated evaluation instant: a published drive is open strictly before deadline. Expiry does not change lifecycle or require a worker/scheduler. An expired published deadline cannot be extended/reopened. Revision and latest notice/time remain on the drive; full historical before/after evidence stays in existing append-only audit logs. Authenticated outputs remain dynamic/private. Phase 7 has no Apply action, application workflow, applicant count/list, resume sharing, matching, notifications, exports, analytics, alumni, or announcements.
 
 ## Rendering and caching
 
