@@ -62,7 +62,9 @@ const messages: Record<string, string> = {
   "recruiter-archived": "The recruiter contact was archived and access is now ineffective.",
   "recruiter-reactivated": "The recruiter contact was reactivated subject to its existing binding.",
   "invitation-sent": "The recruiter invitation was issued and audited.",
-  "invitation-failed": "Invitation delivery failed. No successful invitation state was retained.",
+  "invitation-failed": "The invitation provider did not confirm delivery. Retry through reissue.",
+  "invitation-finalization-pending":
+    "The invitation provider succeeded, but confirmation in the portal could not be completed. Reissue the invitation to recover access; the previous attempt is preserved.",
   "invitation-revoked": "The invitation was revoked and audited.",
   "drive-granted": "Published-drive access was granted and audited.",
   "drive-revoked": "Published-drive access was revoked and audited.",
@@ -121,7 +123,8 @@ export default async function CompanyDetailPage({
         ? supabase
             .from("recruiter_invitations")
             .select("id, recruiter_id, status, expires_at, accepted_at, revocation_reason")
-            .order("created_at", { ascending: false })
+            .order("issued_at", { ascending: false })
+            .order("id", { ascending: false })
         : Promise.resolve({ data: [], error: null }),
       isManager
         ? supabase

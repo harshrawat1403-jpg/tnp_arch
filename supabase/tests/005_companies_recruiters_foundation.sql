@@ -154,6 +154,10 @@ select lives_ok(
 );
 
 reset role;
+-- This fixture represents a provider-created invited user, not arbitrary
+-- editable metadata on an unrelated existing Auth account.
+update auth.users set created_at = now(), invited_at = now()
+where id = '41000000-0000-0000-0000-000000000007';
 insert into public.recruiters (id, company_id, full_name, email, created_by, updated_by)
 values (
   '42000000-0000-0000-0000-000000000004',

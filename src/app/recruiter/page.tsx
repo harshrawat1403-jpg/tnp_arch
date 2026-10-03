@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentIdentity } from "@/lib/supabase/current-identity";
@@ -69,6 +70,11 @@ export default async function RecruiterPage() {
       <h1 id="recruiter-title">{recruiter.full_name}</h1>
       <p className="student-page__summary">
         Your approved company contact and published-drive access.
+      </p>
+      <p>
+        <Link className="text-link" href="/recruiter/setup-password">
+          Set your sign-in password
+        </Link>
       </p>
       <section className="student-status" aria-labelledby="contact-title">
         <p className="student-status__label" id="contact-title">

@@ -28,6 +28,7 @@ type CompanyActionState =
   | "recruiter-reactivated"
   | "invitation-sent"
   | "invitation-failed"
+  | "invitation-finalization-pending"
   | "invitation-revoked"
   | "drive-granted"
   | "drive-revoked"
@@ -211,6 +212,7 @@ async function issueRecruiterInvitation(formData: FormData, isReissue: boolean):
     fail(companyId);
   }
 
+  let authUserId: string;
   try {
     const invitationAdmin = createSupabaseInvitationAdminClient();
     const { data: authData, error: inviteError } =
@@ -219,19 +221,32 @@ async function issueRecruiterInvitation(formData: FormData, isReissue: boolean):
         redirectTo: invitationRedirectUrl(),
       });
     if (inviteError || !authData.user?.id) throw new Error("Invitation delivery failed.");
-
-    const { error: sentError } = await supabase.rpc("mark_recruiter_invitation_sent", {
-      p_auth_user_id: authData.user.id,
-      p_invitation_id: invitation.invitation_id,
-      p_is_reissue: isReissue,
-    });
-    if (sentError) throw new Error("Invitation could not be finalized.");
+    authUserId = authData.user.id;
   } catch {
     await supabase.rpc("mark_recruiter_invitation_delivery_failed", {
       p_invitation_id: invitation.invitation_id,
     });
     refreshCompany(companyId);
     redirect(companyPath(companyId, "invitation-failed"));
+  }
+
+  // Auth has succeeded. A failed/uncertain database hand-off must retain the
+  // PREPARED record (or committed SENT record) for manager-authorized reissue.
+  // Never relabel provider success as delivery failure or delete its Auth user.
+  let finalized = false;
+  try {
+    const { error: sentError } = await supabase.rpc("mark_recruiter_invitation_sent", {
+      p_auth_user_id: authUserId,
+      p_invitation_id: invitation.invitation_id,
+      p_is_reissue: isReissue,
+    });
+    finalized = !sentError;
+  } catch {
+    // A transport failure leaves the commit outcome uncertain; preserve state.
+  }
+  if (!finalized) {
+    refreshCompany(companyId);
+    redirect(companyPath(companyId, "invitation-finalization-pending"));
   }
 
   refreshCompany(companyId);

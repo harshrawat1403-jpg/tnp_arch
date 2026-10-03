@@ -2,6 +2,29 @@
 
 The Training & Placement portal is implementing **Phase 6: Companies and Recruiters**. The application uses server-first Supabase Auth session handling, roster-gated student registration, normalized student skills, and a bounded company/recruiter lifecycle under least-privilege RLS. Drive creation, eligibility, applications, applicant browsing, matching, alumni, analytics, exports, and notifications remain deliberately deferred.
 
+## Recruiter onboarding
+
+Recruiter invitations finish at `/recruiter/setup-password` before the workspace.
+The caller-bound Auth client sets the password; an authenticated active recruiter
+can return through the workspace link. Local password setup uses the configured
+Auth minimum (6 characters); Supabase enforces any stronger hosted policy.
+
+Use the committed invite email template in local and hosted Auth configuration.
+Admin invites do not support PKCE, so the template sends the provider token hash
+to `/auth/callback` for server-side verification rather than a URL-fragment session.
+See [Supabase email templates](https://supabase.com/docs/guides/auth/auth-email-templates).
+No invitation URL, hash, or password is stored in application records or audit.
+
+When Auth issuance succeeds but database finalization fails, the portal reports
+that distinct result and preserves the prepared attempt. A Secretary/Super Admin
+can reissue it. Recovery checks the exact prior invitation, recruiter, email and
+Auth user binding; an unrecorded user binding additionally requires an unconfirmed
+invited Auth user created during that prior invitation's valid window. Confirmed
+users are never deleted/recreated. Issue/reissue audit events derive from history.
+
+Local Auth also allowlists `http://127.0.0.1:3006/auth/callback` for isolated
+onboarding verification when port 3000 is occupied.
+
 ## Prerequisites
 
 - Node.js 20.9 or later
